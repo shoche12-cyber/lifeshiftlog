@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Life Shift">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>Life Shift Log</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Serif+Display:ital@0;1&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --e:#2D3B2A;--mo:#4A6741;--sa:#7A9E72;--mi:#B8CDB4;
+  --cr:#F2EDE4;--pa:#FAF7F2;--wa:#E8DFD0;
+  --am:#C4853A;--ru:#A0522D;--sk:#5B8FA8;--re:#B94040;
+  --tx:#1C2B1A;--su:#5A7055;--hi:#8FAA88;
+  --st:env(safe-area-inset-top,44px);--sb:env(safe-area-inset-bottom,20px);
+  --fd:'DM Serif Display',serif;--fb:'Noto Sans JP',sans-serif;--fm:'Space Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;}
+body{font-family:var(--fb);background:var(--pa);color:var(--tx);position:fixed;width:100%;height:100%;}
+#app{display:flex;flex-direction:column;height:100%;max-width:430px;margin:0 auto;position:relative;overflow:hidden;}
+.scr{display:none;flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:calc(76px + var(--sb));}
+.scr.on{display:block;}
+/* NAV */
+.nav{position:absolute;bottom:0;left:0;right:0;background:rgba(250,247,242,0.94);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:0.5px solid rgba(74,103,65,0.18);padding:8px 0 calc(8px + var(--sb));display:flex;justify-content:space-around;z-index:100;}
+.ni{display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 10px;cursor:pointer;transition:all 0.2s;min-width:52px;}
+.ni-ic{font-size:20px;transition:transform 0.2s;}
+.ni-lb{font-size:10px;color:var(--hi);font-weight:500;letter-spacing:0.02em;transition:color 0.2s;}
+.ni.on .ni-lb{color:var(--mo);font-weight:700;}
+.ni.on .ni-ic{transform:scale(1.1);}
+/* HEADER */
+.ph{padding:calc(10px + var(--st)) 20px 12px;background:var(--pa);position:sticky;top:0;z-index:10;}
+.pt{font-family:var(--fd);font-size:25px;color:var(--e);line-height:1.1;}
+.ps{font-size:11px;color:var(--hi);margin-top:2px;font-weight:300;letter-spacing:0.04em;}
+/* CARDS */
+.cd{background:white;border-radius:16px;border:0.5px solid rgba(74,103,65,0.12);padding:16px;margin:0 16px 12px;}
+.cl{font-size:11px;color:var(--hi);font-weight:500;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;}
+/* COUNTDOWN */
+.cc{background:var(--e);color:white;border-radius:20px;padding:20px;margin:8px 16px 12px;position:relative;overflow:hidden;}
+.cc::before{content:'';position:absolute;top:-40px;right:-40px;width:150px;height:150px;border-radius:50%;background:rgba(122,158,114,0.15);}
+.cc-lb{font-size:10px;color:rgba(255,255,255,0.4);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:5px;}
+.cc-n{font-family:var(--fd);font-size:54px;line-height:1;color:white;letter-spacing:-2px;}
+.cc-n span{font-size:18px;letter-spacing:0;color:rgba(255,255,255,0.5);margin-left:3px;}
+.cc-t{font-size:11px;color:rgba(255,255,255,0.4);margin-top:5px;}
+.cc-t b{color:rgba(255,255,255,0.75);font-weight:500;}
+/* GAUGE */
+.gt{height:8px;background:var(--wa);border-radius:4px;overflow:hidden;margin:7px 0;}
+.gf{height:100%;background:linear-gradient(90deg,var(--sa),var(--mo));border-radius:4px;transition:width 0.7s cubic-bezier(0.4,0,0.2,1);}
+/* BUTTONS */
+.btn{padding:10px 16px;border-radius:10px;border:none;font-family:var(--fb);font-size:14px;font-weight:500;cursor:pointer;transition:all 0.15s;}
+.bp{background:var(--mo);color:white;}.bp:active{transform:scale(0.97);background:var(--e);}
+.bg{background:var(--cr);color:var(--su);}.bg:active{transform:scale(0.97);}
+.bd{background:#FFF0F0;color:var(--re);}.bd:active{transform:scale(0.97);}
+.bam{background:#FDF3E3;color:var(--am);}.bam:active{transform:scale(0.97);}
+.bsk{background:#EAF3F8;color:var(--sk);}.bsk:active{transform:scale(0.97);}
+.bf{width:100%;text-align:center;padding:13px;border-radius:12px;display:block;}
+/* SECTION */
+.sh{display:flex;align-items:center;justify-content:space-between;padding:0 16px;margin-bottom:8px;}
+.stitle{font-size:15px;font-weight:700;color:var(--e);}
+.sa{font-size:12px;color:var(--sk);cursor:pointer;font-weight:500;}
+/* NORMA */
+.nb{background:var(--am);color:white;border-radius:12px;padding:12px 16px;margin:0 16px 12px;display:flex;align-items:center;gap:12px;}
+/* FAB */
+.fab{position:absolute;bottom:calc(80px + var(--sb));right:16px;width:50px;height:50px;border-radius:50%;background:var(--mo);color:white;font-size:24px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(74,103,65,0.35);cursor:pointer;z-index:99;transition:all 0.2s;}
+.fab:active{transform:scale(0.92);}
+/* MODAL */
+.mo{display:none;position:fixed;inset:0;background:rgba(28,43,26,0.5);z-index:200;align-items:flex-end;}
+.mo.on{display:flex;}
+.ms{background:var(--pa);border-radius:24px 24px 0 0;padding:12px 20px calc(20px + var(--sb));width:100%;max-height:90vh;overflow-y:auto;animation:su 0.27s cubic-bezier(0.4,0,0.2,1);}
+.mh{width:36px;height:4px;background:var(--wa);border-radius:2px;margin:0 auto 14px;}
+.mt{font-family:var(--fd);font-size:21px;color:var(--e);margin-bottom:14px;}
+@keyframes su{from{transform:translateY(100%);}to{transform:translateY(0);}}
+/* FORM */
+.fl{font-size:12px;color:var(--su);font-weight:500;margin-bottom:4px;display:block;}
+.fg{margin-bottom:12px;}
+.fi{width:100%;padding:10px 12px;border:1px solid var(--wa);border-radius:10px;font-family:var(--fb);font-size:14px;color:var(--tx);background:var(--pa);outline:none;appearance:none;-webkit-appearance:none;}
+.fi:focus{border-color:var(--sa);}
+textarea.fi{min-height:88px;resize:none;}
+/* CHIPS */
+.ch{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:500;}
+.chg{background:var(--cr);color:var(--mo);}
+.cha{background:#FDF3E3;color:var(--am);}
+.chs{background:#EAF3F8;color:var(--sk);}
+.chr{background:#FEF0F0;color:var(--re);}
+/* ICON BTN */
+.ib{font-size:15px;color:var(--hi);cursor:pointer;padding:3px 5px;border-radius:6px;border:none;background:none;transition:background 0.15s;}
+.ib:active{background:var(--wa);}
+/* SETTINGS */
+.sg{background:white;border-radius:14px;margin:0 16px 16px;border:0.5px solid rgba(74,103,65,0.1);overflow:hidden;}
+.sr{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:0.5px solid rgba(74,103,65,0.1);cursor:pointer;}
+.sr:last-child{border-bottom:none;}
+.sec-t{font-size:11px;color:var(--hi);font-weight:500;letter-spacing:0.08em;text-transform:uppercase;padding:14px 16px 6px;}
+/* SAVINGS */
+.svg-graph{height:90px;display:flex;align-items:flex-end;gap:5px;padding:0 2px;}
+.svb-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;height:100%;justify-content:flex-end;}
+.svb{width:100%;background:var(--sa);border-radius:4px 4px 0 0;min-height:4px;opacity:0.65;}
+.svb.cur{opacity:1;background:var(--mo);}
+.sav-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:0.5px solid var(--wa);}
+.sav-row:last-child{border-bottom:none;}
+/* LOG */
+.le{border-left:2px solid var(--mi);padding:0 0 16px 13px;margin-left:16px;position:relative;}
+.le::before{content:'';position:absolute;left:-5px;top:4px;width:8px;height:8px;border-radius:50%;background:var(--sa);}
+/* CALENDAR */
+.cg{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;padding:0 16px;}
+.cd-lb{text-align:center;font-size:11px;color:var(--hi);padding:4px 0;font-weight:500;}
+.cd-d{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--tx);border-radius:8px;cursor:pointer;position:relative;font-family:var(--fm);}
+.cd-d.he{background:var(--cr);color:var(--su);font-weight:500;}
+.cd-d.td{background:var(--mo);color:white;font-weight:700;}
+.cd-d.em{opacity:0;pointer-events:none;}
+.cd-dot{position:absolute;bottom:3px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--am);}
+/* TODO */
+.ti{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--wa);}
+.ti:last-child{border-bottom:none;}
+.tc{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--hi);cursor:pointer;transition:all 0.2s;flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-top:1px;}
+.tc.dn{background:var(--sa);border-color:var(--sa);}
+.tc.dn::after{content:'✓';color:white;font-size:11px;}
+/* CIRCLE PROGRESS */
+.cp{position:relative;width:90px;height:90px;}
+.cp svg{transform:rotate(-90deg);}
+.cp-n{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:var(--fm);font-size:16px;font-weight:700;color:var(--tx);text-align:center;}
+.cp-n small{display:block;font-size:10px;color:var(--hi);font-weight:400;}
+/* STUDY */
+.sw-display{font-family:var(--fm);font-size:50px;font-weight:700;color:var(--e);text-align:center;letter-spacing:2px;margin:10px 0;line-height:1;}
+.sw-sub{font-size:12px;color:var(--hi);text-align:center;margin-bottom:10px;}
+.sw-lap{background:var(--cr);border-radius:10px;padding:8px 12px;margin-top:8px;}
+.sw-lap-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:0.5px solid var(--wa);font-size:12px;}
+.sw-lap-row:last-child{border-bottom:none;}
+.iv-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:0.5px solid var(--wa);}
+.iv-row:last-child{border-bottom:none;}
+.iv-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.sli{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--wa);}
+.sli:last-child{border-bottom:none;}
+/* AREA NOTES */
+.an-card{background:white;border-radius:14px;border:0.5px solid rgba(74,103,65,0.12);padding:14px 16px;margin:0 16px 10px;cursor:pointer;}
+.an-card:active{background:var(--cr);}
+.an-tag{display:inline-flex;align-items:center;padding:2px 7px;border-radius:12px;font-size:10px;font-weight:500;margin-right:4px;margin-top:4px;}
+.an-tag.general{background:#EAF3F8;color:var(--sk);}
+.an-tag.farming{background:#EAF6E4;color:var(--mo);}
+.an-tag.life{background:#FDF3E3;color:var(--am);}
+.an-tag.access{background:#F3EFF9;color:#6B52A8;}
+.an-tag.cost{background:#FFF0F0;color:var(--re);}
+::-webkit-scrollbar{display:none;}
+input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
+select.fi option{background:var(--pa);}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- HOME -->
+<div id="scr-home" class="scr on">
+  <div class="ph" style="padding-bottom:6px;">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+      <div>
+        <div style="font-size:10px;color:var(--hi);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:2px;">Life Shift Log</div>
+        <div style="font-family:var(--fd);font-size:22px;color:var(--e);" id="home-date-head"></div>
+      </div>
+      <div id="home-avatar" onclick="switchTab('settings')" style="width:34px;height:34px;border-radius:50%;background:var(--e);display:flex;align-items:center;justify-content:center;color:white;font-size:13px;font-weight:700;margin-top:calc(4px + var(--st));cursor:pointer;flex-shrink:0;"></div>
+    </div>
+  </div>
+  <div class="cc">
+    <div class="cc-lb">移住まで</div>
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;">
+      <div>
+        <div class="cc-n" id="cd-num">—<span>日</span></div>
+        <div class="cc-t" id="cd-target"><b>未設定</b></div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:10px;color:rgba(255,255,255,0.3);margin-bottom:3px;">達成率</div>
+        <div style="font-family:var(--fm);font-size:24px;color:var(--mi);" id="home-pct">0%</div>
+      </div>
+    </div>
+  </div>
+  <div class="sh" style="margin-top:2px;">
+    <div class="stitle">貯金状況</div><div class="sa" onclick="switchTab('savings')">詳細 →</div>
+  </div>
+  <div class="cd" style="padding:13px 16px;">
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:8px;">
+      <div>
+        <div class="cl">現在の貯金</div>
+        <div style="font-family:var(--fm);font-size:20px;font-weight:700;color:var(--e);" id="home-sav">¥0</div>
+      </div>
+      <span class="ch chg" id="home-sav-pct">0%</span>
+    </div>
+    <div class="gt"><div class="gf" id="home-gauge" style="width:0%"></div></div>
+  </div>
+  <div id="norma-sec"></div>
+  <div class="sh"><div class="stitle">スキル進捗</div><div class="sa" onclick="switchTab('skills')">すべて →</div></div>
+  <div class="cd" id="home-skills"></div>
+  <div class="sh"><div class="stitle">最近の記録</div><div class="sa" onclick="switchTab('diary')">日記へ →</div></div>
+  <div class="cd" id="home-diary"></div>
+  <div style="height:8px;"></div>
+</div>
+
+<!-- SKILLS -->
+<div id="scr-skills" class="scr">
+  <div class="ph"><div class="pt">スキル管理</div><div class="ps">資格 & 農業スキル</div></div>
+  <div id="skills-list"></div>
+  <div style="padding:0 16px 4px;"><button class="btn bp bf" onclick="openAddSkill()">＋ スキルを追加</button></div>
+  <div style="height:12px;"></div>
+</div>
+
+<!-- SAVINGS -->
+<div id="scr-savings" class="scr">
+  <div class="ph"><div class="pt">資産管理</div><div class="ps">シンプル・セービング</div></div>
+  <div class="cd">
+    <div class="cl">目標達成率</div>
+    <div style="display:flex;align-items:center;gap:18px;">
+      <div class="cp">
+        <svg width="90" height="90" viewBox="0 0 90 90">
+          <circle cx="45" cy="45" r="36" fill="none" stroke="var(--wa)" stroke-width="7"/>
+          <circle cx="45" cy="45" r="36" fill="none" stroke="var(--mo)" stroke-width="7" stroke-dasharray="226.19" id="sav-circle" stroke-dashoffset="226.19" stroke-linecap="round"/>
+        </svg>
+        <div class="cp-n"><span id="sav-pct-n">0</span>%<small>達成</small></div>
+      </div>
+      <div>
+        <div style="font-family:var(--fm);font-size:24px;font-weight:700;color:var(--e);" id="sav-cur">¥0</div>
+        <div style="font-size:12px;color:var(--hi);margin-top:2px;">目標: <span id="sav-tgt-d">—</span></div>
+        <div style="font-size:12px;color:var(--su);margin-top:4px;" id="sav-rem">設定から目標を入力してください</div>
+      </div>
+    </div>
+  </div>
+  <div class="cd"><div class="cl">推移グラフ</div><div class="svg-graph" id="sav-graph"></div></div>
+  <div class="cd">
+    <div class="cl">貯金を更新</div>
+    <div style="display:flex;gap:8px;margin-top:8px;">
+      <input type="number" class="fi" id="sav-input" placeholder="現在の貯金額（円）" style="flex:1;font-family:var(--fm);font-size:16px;">
+      <button class="btn bp" onclick="saveSavings()">記録</button>
+    </div>
+  </div>
+  <div class="cd"><div class="cl">記録履歴</div><div id="sav-hist"></div></div>
+  <div style="height:8px;"></div>
+</div>
+
+<!-- DIARY -->
+<div id="scr-diary" class="scr">
+  <div class="ph"><div class="pt">日誌</div><div class="ps" id="diary-month"></div></div>
+  <div style="margin-bottom:12px;">
+    <div class="cg" id="cal-head"></div>
+    <div class="cg" id="cal-body"></div>
+  </div>
+  <div style="padding:0 16px 8px;"><div style="font-size:13px;color:var(--hi);font-weight:500;">最近の記録</div></div>
+  <div id="diary-list"></div>
+  <div style="height:8px;"></div>
+</div>
+
+<!-- SETTINGS -->
+<div id="scr-settings" class="scr">
+  <div class="ph"><div class="pt">設定</div><div class="ps">プロフィール & 目標</div></div>
+  <div class="sec-t">プロフィール</div>
+  <div class="sg">
+    <div class="sr" onclick="openSetEdit('name')">
+      <div><div style="font-size:14px;font-weight:500;color:var(--tx);">名前</div><div style="font-size:11px;color:var(--hi);margin-top:1px;">ホームに表示されます</div></div>
+      <div style="display:flex;align-items:center;gap:6px;"><span style="font-size:13px;color:var(--hi);font-family:var(--fm);" id="set-name">未設定</span><span style="color:var(--hi);">›</span></div>
+    </div>
+  </div>
+  <div class="sec-t">移住目標</div>
+  <div class="sg">
+    <div class="sr" onclick="openSetEdit('target_date')">
+      <div><div style="font-size:14px;font-weight:500;color:var(--tx);">移住予定日</div><div style="font-size:11px;color:var(--hi);margin-top:1px;">カウントダウンに使用</div></div>
+      <div style="display:flex;align-items:center;gap:6px;"><span style="font-size:13px;color:var(--hi);font-family:var(--fm);" id="set-date">未設定</span><span style="color:var(--hi);">›</span></div>
+    </div>
+    <div class="sr" onclick="openSetEdit('target_place')">
+      <div><div style="font-size:14px;font-weight:500;color:var(--tx);">移住先候補（最有力）</div><div style="font-size:11px;color:var(--hi);margin-top:1px;">カウントダウンに表示</div></div>
+      <div style="display:flex;align-items:center;gap:6px;"><span style="font-size:13px;color:var(--hi);font-family:var(--fm);" id="set-place">未設定</span><span style="color:var(--hi);">›</span></div>
+    </div>
+    <div class="sr" onclick="openSetEdit('target_savings')">
+      <div><div style="font-size:14px;font-weight:500;color:var(--tx);">目標貯金額</div><div style="font-size:11px;color:var(--hi);margin-top:1px;">資産管理の目標値</div></div>
+      <div style="display:flex;align-items:center;gap:6px;"><span style="font-size:13px;color:var(--hi);font-family:var(--fm);" id="set-sav">未設定</span><span style="color:var(--hi);">›</span></div>
+    </div>
+  </div>
+  <div class="sec-t">ToDoリスト</div>
+  <div class="sg">
+    <div id="todo-list" style="padding:4px 16px 8px;"></div>
+    <div style="padding:0 16px 12px;">
+      <div style="display:flex;gap:8px;margin-top:8px;">
+        <input type="text" class="fi" id="todo-new" placeholder="新しいタスクを追加..." style="flex:1;">
+        <button class="btn bp" onclick="addTodo()" style="padding:10px 14px;white-space:nowrap;">追加</button>
+      </div>
+    </div>
+  </div>
+  <div class="sec-t">アプリ情報</div>
+  <div class="sg">
+    <div class="sr" style="cursor:default;">
+      <div><div style="font-size:14px;font-weight:500;color:var(--tx);">Life Shift Log</div><div style="font-size:11px;color:var(--hi);margin-top:1px;">データはこの端末に保存されます</div></div>
+      <span style="font-size:13px;color:var(--hi);font-family:var(--fm);">v2.1</span>
+    </div>
+  </div>
+  <div style="height:12px;"></div>
+</div>
+
+<!-- AREA NOTES -->
+<div id="scr-areas" class="scr">
+  <div class="ph">
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <div><div class="pt">エリアノート</div><div class="ps">訪問地の記録 & 農業メモ</div></div>
+      <button class="btn bp" onclick="openNewArea()" style="padding:8px 14px;font-size:13px;margin-top:calc(var(--st) + 2px);">＋ 追加</button>
+    </div>
+  </div>
+  <div id="area-list"></div>
+  <div style="height:12px;"></div>
+</div>
+
+<!-- DIARY FAB -->
+<div class="fab" id="diary-fab" style="display:none;" onclick="openNewDiary()">＋</div>
+
+<!-- NAV -->
+<div class="nav">
+  <div class="ni on" onclick="switchTab('home')" id="nav-home"><span class="ni-ic">🏡</span><span class="ni-lb">ホーム</span></div>
+  <div class="ni" onclick="switchTab('skills')" id="nav-skills"><span class="ni-ic">📚</span><span class="ni-lb">スキル</span></div>
+  <div class="ni" onclick="switchTab('savings')" id="nav-savings"><span class="ni-ic">🌱</span><span class="ni-lb">貯金</span></div>
+  <div class="ni" onclick="switchTab('diary')" id="nav-diary"><span class="ni-ic">📖</span><span class="ni-lb">日誌</span></div>
+  <div class="ni" onclick="switchTab('areas')" id="nav-areas"><span class="ni-ic">🗺️</span><span class="ni-lb">エリア</span></div>
+</div>
+
+<!-- MODAL: Add/Edit Skill -->
+<div class="mo" id="m-skill" onclick="mOut(event,'m-skill')">
+  <div class="ms">
+    <div class="mh"></div>
+    <div class="mt" id="m-skill-title">スキルを追加</div>
+    <div class="fg"><label class="fl">スキル名</label><input type="text" class="fi" id="sk-name" placeholder="例：農業技術検定2級"></div>
+    <div class="fg"><label class="fl">種別</label>
+      <div style="display:flex;gap:8px;">
+        <button class="btn bp" id="sk-btn-exam" onclick="setSkillType(true)" style="flex:1;">📋 資格試験</button>
+        <button class="btn bg" id="sk-btn-skill" onclick="setSkillType(false)" style="flex:1;">🌿 スキル</button>
+      </div>
+    </div>
+    <div id="sk-exam-f">
+      <div class="fg"><label class="fl">試験日</label><input type="date" class="fi" id="sk-exam-date"></div>
+      <div class="fg"><label class="fl">目標勉強時間（時間）</label><input type="number" class="fi" id="sk-target-h" placeholder="例：150"></div>
+    </div>
+    <div id="sk-skill-f" style="display:none;">
+      <div class="fg"><label class="fl">目標時間（時間）</label><input type="number" class="fi" id="sk-skill-h" placeholder="例：200"></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:4px;">
+      <button class="btn bg bf" onclick="closeM('m-skill')">キャンセル</button>
+      <button class="btn bp bf" id="sk-save-btn" onclick="saveSkill()">追加</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Study Session -->
+<div class="mo" id="m-study" onclick="mOut(event,'m-study')">
+  <div class="ms">
+    <div class="mh"></div>
+    <div class="mt" id="m-study-title">学習セッション</div>
+    <div style="display:flex;gap:4px;background:var(--wa);border-radius:10px;padding:3px;margin-bottom:14px;">
+      <button class="btn" id="tab-sw-btn" onclick="setStudyTab('sw')" style="flex:1;padding:7px;border-radius:8px;font-size:13px;background:white;color:var(--mo);font-weight:700;">⏱ ストップウォッチ</button>
+      <button class="btn" id="tab-iv-btn" onclick="setStudyTab('iv')" style="flex:1;padding:7px;border-radius:8px;font-size:13px;background:none;color:var(--hi);">⏲ インターバル</button>
+    </div>
+    <div id="tab-sw">
+      <div class="sw-display" id="sw-time">00:00:00</div>
+      <div class="sw-sub" id="sw-status">タップして開始</div>
+      <div style="display:flex;gap:8px;justify-content:center;margin-bottom:10px;">
+        <button class="btn bp" id="sw-start-btn" onclick="swToggle()" style="min-width:76px;">開始</button>
+        <button class="btn bg" onclick="swLap()" style="min-width:76px;">ラップ</button>
+        <button class="btn bd" onclick="swReset()" style="min-width:60px;">リセット</button>
+      </div>
+      <div id="sw-laps" class="sw-lap" style="display:none;"></div>
+    </div>
+    <div id="tab-iv" style="display:none;">
+      <div id="iv-config">
+        <div class="fg"><label class="fl">勉強時間（分）</label><input type="number" class="fi" id="iv-study-min" value="25" min="1"></div>
+        <div class="fg"><label class="fl">休憩時間（分）</label><input type="number" class="fi" id="iv-rest-min" value="5" min="1"></div>
+        <div class="fg"><label class="fl">セット数</label><input type="number" class="fi" id="iv-sets" value="4" min="1" max="20"></div>
+        <button class="btn bp bf" onclick="ivStart()">インターバル開始</button>
+      </div>
+      <div id="iv-running" style="display:none;">
+        <div class="sw-display" id="iv-time">25:00</div>
+        <div class="sw-sub" id="iv-phase-label">準備完了</div>
+        <div style="display:flex;gap:8px;justify-content:center;margin-bottom:10px;">
+          <button class="btn bp" id="iv-toggle-btn" onclick="ivToggle()" style="min-width:76px;">開始</button>
+          <button class="btn bd" onclick="ivStop()" style="min-width:76px;">終了</button>
+        </div>
+        <div id="iv-sets-disp" class="sw-lap"></div>
+      </div>
+    </div>
+    <hr style="border:none;border-top:0.5px solid var(--wa);margin:12px 0;">
+    <div style="font-size:13px;font-weight:700;color:var(--e);margin-bottom:10px;">学習を記録する</div>
+    <div class="fg"><label class="fl">学習時間（分）</label>
+      <div style="display:flex;gap:8px;">
+        <input type="number" class="fi" id="log-min" placeholder="例：45" style="flex:1;">
+        <button class="btn bam" onclick="fillFromSW()" style="white-space:nowrap;padding:10px 12px;font-size:12px;">SWから入力</button>
+      </div>
+    </div>
+    <div class="fg"><label class="fl">ページ記録</label>
+      <div style="display:flex;gap:8px;">
+        <div style="flex:1;"><label class="fl" style="font-size:11px;">開始ページ</label><input type="number" class="fi" id="log-page-from" placeholder="例：42"></div>
+        <div style="flex:1;"><label class="fl" style="font-size:11px;">終了ページ</label><input type="number" class="fi" id="log-page-to" placeholder="例：58"></div>
+      </div>
+    </div>
+    <div class="fg"><label class="fl">使用した参考書</label><select class="fi" id="log-book-sel"></select></div>
+    <div class="fg"><label class="fl">メモ（任意）</label><input type="text" class="fi" id="log-memo" placeholder="今日学んだこと..."></div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn bg bf" onclick="closeM('m-study')">閉じる</button>
+      <button class="btn bp bf" onclick="logStudy()">記録する</button>
+    </div>
+    <div id="study-hist" style="margin-top:14px;"></div>
+  </div>
+</div>
+
+<!-- MODAL: Edit Study Log -->
+<div class="mo" id="m-edit-log" onclick="mOut(event,'m-edit-log')">
+  <div class="ms">
+    <div class="mh"></div>
+    <div class="mt">学習記録を編集</div>
+    <div class="fg"><label class="fl">学習時間（分）</label><input type="number" class="fi" id="el-min"></div>
+    <div class="fg"><label class="fl">ページ記録</label>
+      <div style="display:flex;gap:8px;">
+        <div style="flex:1;"><label class="fl" style="font-size:11px;">開始</label><input type="number" class="fi" id="el-page-from"></div>
+        <div style="flex:1;"><label class="fl" style="font-size:11px;">終了</label><input type="number" class="fi" id="el-page-to"></div>
+      </div>
+    </div>
+    <div class="fg"><label class="fl">参考書</label><select class="fi" id="el-book-sel"></select></div>
+    <div class="fg"><label class="fl">メモ</label><input type="text" class="fi" id="el-memo"></div>
+    <div style="display:flex;gap:8px;margin-top:4px;">
+      <button class="btn bd bf" onclick="deleteLog()">削除</button>
+      <button class="btn bp bf" onclick="saveEditedLog()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Textbooks -->
+<div class="mo" id="m-books" onclick="mOut(event,'m-books')">
+  <div class="ms">
+    <div class="mh"></div>
+    <div class="mt" id="m-books-title">参考書管理</div>
+    <div id="books-list" style="margin-bottom:12px;"></div>
+    <div class="fg"><label class="fl">参考書名を追加</label>
+      <div style="display:flex;gap:8px;">
+        <input type="text" class="fi" id="book-new-name" placeholder="例：農業技術検定テキスト" style="flex:1;">
+        <button class="btn bp" onclick="addBook()">追加</button>
+      </div>
+    </div>
+    <button class="btn bg bf" style="margin-top:4px;" onclick="closeM('m-books')">閉じる</button>
+  </div>
+</div>
+
+<!-- MODAL: Add/Edit Diary -->
+<div class="mo" id="m-diary" onclick="mOut(event,'m-diary')">
+  <div class="ms">
+    <div class="mh"></div>
+    <div class="mt" id="m-diary-title">今日の記録</div>
+    <div class="fg"><label class="fl">日付</label><input type="date" class="fi" id="diar-date"></div>
+    <div class="fg"><label class="fl">日誌</label><textarea class="fi" id="diar-content" placeholder="今日の進捗、気持ち、気づき..."></textarea></div>
+    <div class="fg"><label class="fl">関連スキル（任意）</label><select class="fi" id="diar-skill"><option value="">なし</option></select></div>
+    <div style="display:flex;gap:8px;margin-top:4px;" id="diar-btns"></div>
+  </div>
+</div>
+
+<!-- MODAL: Setting Edit -->
+<div class="mo" id="m-set" onclick="mOut(event,'m-set')">
+  <div class="ms">
+    <div class="mh"></div>
+    <div class="mt" id="m-set-title">設定を変更</div>
+    <div class="fg"><label class="fl" id="m-set-label">値</label><input class="fi" id="m-set-input"></div>
+    <div style="display:flex;gap:8px;margin-top:4px;">
+      <button class="btn bg bf" onclick="closeM('m-set')">キャンセル</button>
+      <button class="btn bp bf" onclick="saveSetEdit()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Edit Todo -->
+<div class="mo" id="m-todo" onclick="mOut(event,'m-todo')">
+  <div class="ms">
+    <div class="mh"></div>
+    <div class="mt">タスクを編集</div>
+    <div class="fg"><label class="fl">タスク内容</label><input type="text" class="fi" id="todo-edit-inp"></div>
+    <div style="display:flex;gap:8px;margin-top:4px;">
+      <button class="btn bd bf" onclick="deleteEditTodo()">削除</button>
+      <button class="btn bp bf" onclick="saveEditTodo()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Edit Savings -->
+<div class="mo" id="m-sav-edit" onclick="mOut(event,'m-sav-edit')">
+  <div class="ms">
+    <div class="mh"></div>
+    <div class="mt">貯金記録を編集</div>
+    <div class="fg"><label class="fl">金額（円）</label><input type="number" class="fi" id="se-amount" style="font-family:var(--fm);font-size:16px;"></div>
+    <div class="fg"><label class="fl">日付</label><input type="date" class="fi" id="se-date"></div>
+    <div style="display:flex;gap:8px;margin-top:4px;">
+      <button class="btn bd bf" onclick="deleteSavEntry()">削除</button>
+      <button class="btn bp bf" onclick="saveEditSav()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Add/Edit Area Note -->
+<div class="mo" id="m-area" onclick="mOut(event,'m-area')">
+  <div class="ms">
+    <div class="mh"></div>
+    <div class="mt" id="m-area-title">エリアを追加</div>
+    <div class="fg"><label class="fl">エリア名・地名</label><input type="text" class="fi" id="an-name" placeholder="例：長野県安曇野市"></div>
+    <div class="fg"><label class="fl">訪問日（任意）</label><input type="date" class="fi" id="an-date"></div>
+    <div class="fg"><label class="fl">カテゴリ</label>
+      <select class="fi" id="an-cat">
+        <option value="general">🗺️ 総合メモ</option>
+        <option value="farming">🌾 農業・就農</option>
+        <option value="life">🏘️ 生活環境</option>
+        <option value="access">🚃 交通・アクセス</option>
+        <option value="cost">💴 生活コスト</option>
+      </select>
+    </div>
+    <div class="fg"><label class="fl">内容</label><textarea class="fi" id="an-content" placeholder="気候、農地の状況、就農支援制度、生活環境、住民の雰囲気など..." style="min-height:120px;"></textarea></div>
+    <div class="fg"><label class="fl">評価（任意）</label>
+      <div style="display:flex;gap:6px;" id="an-star-row">
+        <button class="btn" id="star-1" onclick="setStar(1)" style="flex:1;padding:8px;font-size:18px;background:var(--wa);">★</button>
+        <button class="btn" id="star-2" onclick="setStar(2)" style="flex:1;padding:8px;font-size:18px;background:var(--wa);">★</button>
+        <button class="btn" id="star-3" onclick="setStar(3)" style="flex:1;padding:8px;font-size:18px;background:var(--wa);">★</button>
+        <button class="btn" id="star-4" onclick="setStar(4)" style="flex:1;padding:8px;font-size:18px;background:var(--wa);">★</button>
+        <button class="btn" id="star-5" onclick="setStar(5)" style="flex:1;padding:8px;font-size:18px;background:var(--wa);">★</button>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:4px;" id="area-btns"></div>
+  </div>
+</div>
+
+</div><!-- #app -->
+<script>
+// ══ STORAGE ══
+const S={g:k=>{try{return JSON.parse(localStorage.getItem('lsl_'+k))}catch(e){return null}},s:(k,v)=>localStorage.setItem('lsl_'+k,JSON.stringify(v))};
+let D={
+  name:S.g('name')||'',target_date:S.g('target_date')||'',target_place:S.g('target_place')||'',
+  target_savings:S.g('target_savings')||0,skills:S.g('skills')||[],
+  savings_log:S.g('savings_log')||[],diaries:S.g('diaries')||[],
+  todos:S.g('todos')||[],area_notes:S.g('area_notes')||[],
+};
+const sv=k=>S.s(k,D[k]);
+
+// ══ NAV ══
+function switchTab(t){
+  document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
+  document.getElementById('scr-'+t).classList.add('on');
+  document.getElementById('nav-'+t).classList.add('on');
+  document.getElementById('diary-fab').style.display=t==='diary'?'flex':'none';
+  ({home:rHome,skills:rSkills,savings:rSavings,diary:rDiary,settings:rSettings,areas:rAreas})[t]?.();
+}
+function openM(id){document.getElementById(id).classList.add('on');}
+function closeM(id){document.getElementById(id).classList.remove('on');}
+function mOut(e,id){if(e.target===document.getElementById(id))closeM(id);}
+
+// ══ HELPERS ══
+const today=()=>new Date().toISOString().split('T')[0];
+const fmtDate=ds=>{if(!ds)return '未設定';const[y,m,d]=ds.split('-');return y+'年'+parseInt(m)+'月'+parseInt(d)+'日';};
+const fmtYen=n=>'¥'+Math.round(n).toLocaleString();
+const daysUntil=ds=>{if(!ds)return null;const t=new Date(ds),n=new Date();n.setHours(0,0,0,0);return Math.max(0,Math.ceil((t-n)/86400000));};
+// ★ FIX: safe curSav — never reads from undefined entry
+const curSav=()=>{if(!D.savings_log||!D.savings_log.length)return 0;const last=D.savings_log[D.savings_log.length-1];return(last&&typeof last.amount==='number')?last.amount:0;};
+const calcNorma=s=>{if(!s.is_exam||!s.exam_date)return null;const r=Math.max(0,s.target_hours-(s.total_logged_hours||0));const d=daysUntil(s.exam_date);if(!d)return 0;return Math.ceil((r/d)*60);};
+const fmtMs=ms=>{const s=Math.floor(ms/1000),h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sc=s%60;return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sc).padStart(2,'0')}`;};
+const fmtMSec=s=>{const m=Math.floor(s/60),sc=s%60;return `${String(m).padStart(2,'0')}:${String(sc).padStart(2,'0')}`;};
+const catLabel={general:'🗺️ 総合',farming:'🌾 農業',life:'🏘️ 生活',access:'🚃 交通',cost:'💴 コスト'};
+const catClass={general:'general',farming:'farming',life:'life',access:'access',cost:'cost'};
+
+// ══ SETTINGS ══
+let curSetKey='';
+const setMeta={name:{title:'名前を設定',label:'表示名',type:'text',ph:'例：尚平'},target_date:{title:'移住予定日',label:'日付',type:'date',ph:''},target_place:{title:'移住先候補（最有力）',label:'地名・エリア',type:'text',ph:'例：長野県安曇野市'},target_savings:{title:'目標貯金額',label:'金額（円）',type:'number',ph:'例：3000000'}};
+function openSetEdit(k){curSetKey=k;const m=setMeta[k];document.getElementById('m-set-title').textContent=m.title;document.getElementById('m-set-label').textContent=m.label;const inp=document.getElementById('m-set-input');inp.type=m.type;inp.placeholder=m.ph;inp.value=D[k]||'';openM('m-set');setTimeout(()=>inp.focus(),300);}
+function saveSetEdit(){const v=document.getElementById('m-set-input').value.trim();if(!v)return;D[curSetKey]=curSetKey==='target_savings'?parseFloat(v)||0:v;sv(curSetKey);closeM('m-set');rSettings();rHome();if(curSetKey==='target_savings')rSavings();}
+
+// ══ SKILL TYPE ══
+let skIsExam=true,editSkIdx=null;
+function setSkillType(e){skIsExam=e;document.getElementById('sk-exam-f').style.display=e?'block':'none';document.getElementById('sk-skill-f').style.display=e?'none':'block';document.getElementById('sk-btn-exam').className='btn '+(e?'bp':'bg');document.getElementById('sk-btn-skill').className='btn '+(e?'bg':'bp');}
+function openAddSkill(){editSkIdx=null;document.getElementById('m-skill-title').textContent='スキルを追加';document.getElementById('sk-save-btn').textContent='追加';['sk-name','sk-target-h','sk-exam-date','sk-skill-h'].forEach(id=>document.getElementById(id).value='');setSkillType(true);openM('m-skill');}
+function openEditSkill(i){editSkIdx=i;const s=D.skills[i];document.getElementById('m-skill-title').textContent='スキルを編集';document.getElementById('sk-save-btn').textContent='保存';document.getElementById('sk-name').value=s.name;setSkillType(s.is_exam);if(s.is_exam){document.getElementById('sk-exam-date').value=s.exam_date||'';document.getElementById('sk-target-h').value=s.target_hours;}else document.getElementById('sk-skill-h').value=s.target_hours;openM('m-skill');}
+function saveSkill(){const name=document.getElementById('sk-name').value.trim();if(!name)return;const th=parseFloat(skIsExam?document.getElementById('sk-target-h').value:document.getElementById('sk-skill-h').value)||100;const ed=skIsExam?document.getElementById('sk-exam-date').value:null;if(editSkIdx!==null){const s=D.skills[editSkIdx];s.name=name;s.is_exam=skIsExam;s.target_hours=th;s.exam_date=ed;}else D.skills.push({id:Date.now(),name,is_exam:skIsExam,exam_date:ed,target_hours:th,total_logged_hours:0,logs:[],books:[]});sv('skills');closeM('m-skill');rSkills();rHome();}
+function deleteSkill(i){if(!confirm(D.skills[i].name+'を削除しますか？'))return;D.skills.splice(i,1);sv('skills');rSkills();rHome();}
+
+// ══ TEXTBOOKS ══
+let curBookSkIdx=null;
+function openBooks(i){curBookSkIdx=i;document.getElementById('m-books-title').textContent=D.skills[i].name+' 参考書';document.getElementById('book-new-name').value='';rBooksList();openM('m-books');}
+function rBooksList(){const el=document.getElementById('books-list');const bks=(D.skills[curBookSkIdx].books||[]);if(!bks.length){el.innerHTML='<div style="font-size:13px;color:var(--hi);padding:4px 0;">参考書が登録されていません</div>';return;}el.innerHTML=bks.map((b,i)=>`<div style="display:flex;align-items:center;padding:8px 0;border-bottom:0.5px solid var(--wa);"><div style="flex:1;font-size:13px;">📖 ${b}</div><button class="ib" onclick="deleteBook(${i})">✕</button></div>`).join('');}
+function addBook(){const v=document.getElementById('book-new-name').value.trim();if(!v)return;D.skills[curBookSkIdx].books=D.skills[curBookSkIdx].books||[];D.skills[curBookSkIdx].books.push(v);sv('skills');document.getElementById('book-new-name').value='';rBooksList();}
+function deleteBook(i){D.skills[curBookSkIdx].books.splice(i,1);sv('skills');rBooksList();}
+
+// ══ STUDY SESSION ══
+let curStudySkIdx=null,editLogSkIdx=null,editLogIdx=null;
+let swRunning=false,swStart=null,swElapsed=0,swLaps=[],swTimer=null;
+let ivRunning=false,ivTimer=null,ivPhase='study',ivRemSec=0,ivCurSet=0,ivTotalSets=0,ivStudyMin=25,ivRestMin=5,ivTotalStudySec=0;
+
+function openStudy(i){curStudySkIdx=i;document.getElementById('m-study-title').textContent=D.skills[i].name+' — 学習セッション';['log-min','log-page-from','log-page-to','log-memo'].forEach(id=>document.getElementById(id).value='');fillBookSel('log-book-sel',i);setStudyTab('sw');swReset();rStudyHist(i);openM('m-study');}
+function fillBookSel(elId,skIdx){const sel=document.getElementById(elId);sel.innerHTML='<option value="">選択なし</option>';(D.skills[skIdx].books||[]).forEach(b=>{const o=document.createElement('option');o.value=b;o.textContent=b;sel.appendChild(o);});}
+function setStudyTab(t){const sw=t==='sw';document.getElementById('tab-sw').style.display=sw?'block':'none';document.getElementById('tab-iv').style.display=sw?'none':'block';const act='flex:1;padding:7px;border-radius:8px;font-size:13px;background:white;color:var(--mo);font-weight:700;';const inact='flex:1;padding:7px;border-radius:8px;font-size:13px;background:none;color:var(--hi);';document.getElementById('tab-sw-btn').style.cssText=sw?act:inact;document.getElementById('tab-iv-btn').style.cssText=sw?inact:act;}
+
+// STOPWATCH
+function swToggle(){if(swRunning){clearInterval(swTimer);swElapsed+=Date.now()-swStart;swRunning=false;document.getElementById('sw-start-btn').textContent='再開';document.getElementById('sw-status').textContent='一時停止中';}else{swStart=Date.now();swTimer=setInterval(()=>document.getElementById('sw-time').textContent=fmtMs(swElapsed+(Date.now()-swStart)),100);swRunning=true;document.getElementById('sw-start-btn').textContent='一時停止';document.getElementById('sw-status').textContent='計測中...';}}
+function swLap(){if(!swRunning&&swElapsed===0)return;const now=swElapsed+(swRunning?Date.now()-swStart:0);swLaps.push(now);const el=document.getElementById('sw-laps');el.style.display='block';el.innerHTML=swLaps.map((t,i)=>`<div class="sw-lap-row"><span style="color:var(--hi);">Lap ${i+1}</span><span style="font-family:var(--fm);">${fmtMs(t)}</span></div>`).reverse().join('');}
+function swReset(){clearInterval(swTimer);swRunning=false;swStart=null;swElapsed=0;swLaps=[];document.getElementById('sw-time').textContent='00:00:00';document.getElementById('sw-start-btn').textContent='開始';document.getElementById('sw-status').textContent='タップして開始';const el=document.getElementById('sw-laps');el.style.display='none';el.innerHTML='';}
+function fillFromSW(){const tot=swElapsed+(swRunning?Date.now()-swStart:0);if(tot>0)document.getElementById('log-min').value=Math.ceil(tot/60000);}
+
+// INTERVAL
+function ivStart(){ivStudyMin=parseInt(document.getElementById('iv-study-min').value)||25;ivRestMin=parseInt(document.getElementById('iv-rest-min').value)||5;ivTotalSets=parseInt(document.getElementById('iv-sets').value)||4;ivCurSet=0;ivPhase='study';ivRemSec=ivStudyMin*60;ivTotalStudySec=0;document.getElementById('iv-config').style.display='none';document.getElementById('iv-running').style.display='block';rIvSets();ivRenderPhase();}
+function ivToggle(){if(ivRunning){clearInterval(ivTimer);ivRunning=false;document.getElementById('iv-toggle-btn').textContent='再開';}else{ivTimer=setInterval(ivTick,1000);ivRunning=true;document.getElementById('iv-toggle-btn').textContent='一時停止';}}
+function ivTick(){ivRemSec--;if(ivPhase==='study')ivTotalStudySec++;document.getElementById('iv-time').textContent=fmtMSec(ivRemSec);if(ivRemSec<=0){if(ivPhase==='study'){ivPhase='rest';ivRemSec=ivRestMin*60;}else{ivCurSet++;if(ivCurSet>=ivTotalSets){ivStop();return;}ivPhase='study';ivRemSec=ivStudyMin*60;}ivRenderPhase();rIvSets();}}
+function ivRenderPhase(){const st=ivPhase==='study';document.getElementById('iv-phase-label').textContent=st?`勉強中 — セット ${ivCurSet+1}/${ivTotalSets}`:`休憩中 — セット ${ivCurSet+1}終了`;document.getElementById('iv-time').style.color=st?'var(--mo)':'var(--am)';document.getElementById('iv-time').textContent=fmtMSec(ivRemSec);}
+function ivStop(){clearInterval(ivTimer);ivRunning=false;document.getElementById('iv-running').style.display='none';document.getElementById('iv-config').style.display='block';if(ivTotalStudySec>0)document.getElementById('log-min').value=Math.ceil(ivTotalStudySec/60);}
+function rIvSets(){document.getElementById('iv-sets-disp').innerHTML=Array.from({length:ivTotalSets},(_,i)=>{let cls,lbl;if(i<ivCurSet){cls='background:var(--sa)';lbl='完了';}else if(i===ivCurSet){cls=ivPhase==='study'?'background:var(--mo)':'background:var(--am)';lbl=ivPhase==='study'?'勉強中':'休憩中';}else{cls='background:var(--wa)';lbl='待機';}return `<div class="iv-row"><div class="iv-dot" style="${cls}"></div><div style="flex:1;font-size:13px;">セット ${i+1}</div><div style="font-size:12px;color:var(--hi);">${lbl}</div></div>`;}).join('');}
+
+// LOG STUDY
+function logStudy(){const mins=parseFloat(document.getElementById('log-min').value);if(!mins||mins<=0)return;const s=D.skills[curStudySkIdx];s.total_logged_hours=(s.total_logged_hours||0)+mins/60;s.logs=s.logs||[];const pf=parseInt(document.getElementById('log-page-from').value)||null,pt=parseInt(document.getElementById('log-page-to').value)||null;s.logs.push({id:Date.now(),date:today(),minutes:mins,page_from:pf,page_to:pt,book:document.getElementById('log-book-sel').value||null,memo:document.getElementById('log-memo').value});sv('skills');['log-min','log-page-from','log-page-to','log-memo'].forEach(id=>document.getElementById(id).value='');rStudyHist(curStudySkIdx);rSkills();rHome();}
+function rStudyHist(i){const s=D.skills[i];const logs=(s.logs||[]).slice().reverse().slice(0,8);const el=document.getElementById('study-hist');if(!logs.length){el.innerHTML='';return;}el.innerHTML='<div style="font-size:11px;color:var(--hi);font-weight:500;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">記録履歴</div>'+logs.map((l,ri)=>{const origIdx=(s.logs||[]).length-1-ri;const pages=l.page_from&&l.page_to?` · p.${l.page_from}→${l.page_to}`:'';const bk=l.book?` 📖${l.book}`:'';return `<div class="sli"><div style="flex:1;"><div style="font-family:var(--fm);font-size:13px;">${l.minutes}分${pages}</div><div style="font-size:11px;color:var(--hi);">${l.date}${bk}${l.memo?' · '+l.memo:''}</div></div><button class="ib" onclick="openEditLog(${i},${origIdx})">✏️</button></div>`;}).join('');}
+function openEditLog(si,li){editLogSkIdx=si;editLogIdx=li;const l=D.skills[si].logs[li];document.getElementById('el-min').value=l.minutes;document.getElementById('el-page-from').value=l.page_from||'';document.getElementById('el-page-to').value=l.page_to||'';document.getElementById('el-memo').value=l.memo||'';fillBookSel('el-book-sel',si);document.getElementById('el-book-sel').value=l.book||'';openM('m-edit-log');}
+function saveEditedLog(){const mins=parseFloat(document.getElementById('el-min').value);if(!mins||mins<=0)return;const s=D.skills[editLogSkIdx];const oldM=s.logs[editLogIdx].minutes;s.total_logged_hours=Math.max(0,(s.total_logged_hours||0)-(oldM/60)+(mins/60));s.logs[editLogIdx]={...s.logs[editLogIdx],minutes:mins,page_from:parseInt(document.getElementById('el-page-from').value)||null,page_to:parseInt(document.getElementById('el-page-to').value)||null,book:document.getElementById('el-book-sel').value||null,memo:document.getElementById('el-memo').value};sv('skills');closeM('m-edit-log');rStudyHist(editLogSkIdx);rSkills();rHome();}
+function deleteLog(){const s=D.skills[editLogSkIdx];const m=s.logs[editLogIdx].minutes;s.total_logged_hours=Math.max(0,(s.total_logged_hours||0)-(m/60));s.logs.splice(editLogIdx,1);sv('skills');closeM('m-edit-log');rStudyHist(editLogSkIdx);rSkills();rHome();}
+
+// ══ SAVINGS ══ (BUG FIX: no early return after graph, proper index handling)
+let editSavOrigIdx=null;
+function saveSavings(){
+  const v=parseFloat(document.getElementById('sav-input').value);
+  if(isNaN(v)||v<0)return;
+  D.savings_log.push({amount:v,created_at:today()});
+  sv('savings_log');
+  document.getElementById('sav-input').value='';
+  rSavings();rHome();
+}
+function openEditSav(origIdx){
+  // origIdx is already the original index (passed directly from render)
+  editSavOrigIdx=origIdx;
+  const l=D.savings_log[origIdx];
+  if(!l)return;
+  document.getElementById('se-amount').value=l.amount;
+  document.getElementById('se-date').value=l.created_at;
+  openM('m-sav-edit');
+}
+function saveEditSav(){
+  const v=parseFloat(document.getElementById('se-amount').value);
+  const d=document.getElementById('se-date').value;
+  if(isNaN(v)||!d||editSavOrigIdx===null)return;
+  D.savings_log[editSavOrigIdx]={amount:v,created_at:d};
+  sv('savings_log');closeM('m-sav-edit');rSavings();rHome();
+}
+function deleteSavEntry(){
+  if(editSavOrigIdx===null)return;
+  D.savings_log.splice(editSavOrigIdx,1);
+  sv('savings_log');closeM('m-sav-edit');rSavings();rHome();
+}
+
+// ══ DIARY ══
+let editDiaryIdx=null;
+function popDiarySel(selId){const sel=document.getElementById(selId);sel.innerHTML='<option value="">なし</option>';D.skills.forEach(s=>{const o=document.createElement('option');o.value=s.id;o.textContent=s.name;sel.appendChild(o);});}
+function setDiaryBtns(isEdit,idx){document.getElementById('diar-btns').innerHTML=isEdit?`<button class="btn bd bf" onclick="deleteDiary(${idx})">削除</button><button class="btn bp bf" onclick="saveDiary()">保存する</button>`:`<button class="btn bg bf" onclick="closeM('m-diary')">キャンセル</button><button class="btn bp bf" onclick="saveDiary()">保存する</button>`;}
+function openNewDiary(){editDiaryIdx=null;document.getElementById('m-diary-title').textContent='今日の記録';document.getElementById('diar-date').value=today();document.getElementById('diar-content').value='';popDiarySel('diar-skill');setDiaryBtns(false,null);openM('m-diary');}
+function openEditDiary(i){editDiaryIdx=i;const d=D.diaries[i];document.getElementById('m-diary-title').textContent='記録を編集';document.getElementById('diar-date').value=d.date;document.getElementById('diar-content').value=d.content;popDiarySel('diar-skill');document.getElementById('diar-skill').value=d.linked_skill_id||'';setDiaryBtns(true,i);openM('m-diary');}
+function saveDiary(){const c=document.getElementById('diar-content').value.trim();if(!c)return;const date=document.getElementById('diar-date').value||today();const lk=document.getElementById('diar-skill').value||null;if(editDiaryIdx!==null)D.diaries[editDiaryIdx]={...D.diaries[editDiaryIdx],date,content:c,linked_skill_id:lk};else D.diaries.unshift({id:Date.now(),date,content:c,linked_skill_id:lk});D.diaries.sort((a,b)=>b.date.localeCompare(a.date));sv('diaries');closeM('m-diary');rDiary();rHome();}
+function deleteDiary(i){D.diaries.splice(i,1);sv('diaries');closeM('m-diary');rDiary();rHome();}
+
+// ══ AREA NOTES ══
+let editAreaIdx=null,curStar=0;
+function setStar(n){curStar=n;for(let i=1;i<=5;i++){const btn=document.getElementById('star-'+i);btn.style.background=i<=n?'var(--am)':'var(--wa)';btn.style.color=i<=n?'white':'var(--hi)';}}
+function openNewArea(){editAreaIdx=null;curStar=0;document.getElementById('m-area-title').textContent='エリアを追加';['an-name','an-content'].forEach(id=>document.getElementById(id).value='');document.getElementById('an-date').value=today();document.getElementById('an-cat').value='general';setStar(0);document.getElementById('area-btns').innerHTML=`<button class="btn bg bf" onclick="closeM('m-area')">キャンセル</button><button class="btn bp bf" onclick="saveArea()">追加</button>`;openM('m-area');}
+function openEditArea(i){editAreaIdx=i;const a=D.area_notes[i];document.getElementById('m-area-title').textContent='エリアを編集';document.getElementById('an-name').value=a.name||'';document.getElementById('an-date').value=a.date||'';document.getElementById('an-cat').value=a.cat||'general';document.getElementById('an-content').value=a.content||'';curStar=a.star||0;setStar(curStar);document.getElementById('area-btns').innerHTML=`<button class="btn bd bf" onclick="deleteArea(${i})">削除</button><button class="btn bp bf" onclick="saveArea()">保存する</button>`;openM('m-area');}
+function saveArea(){const name=document.getElementById('an-name').value.trim();if(!name)return;const entry={id:editAreaIdx!==null?D.area_notes[editAreaIdx].id:Date.now(),name,date:document.getElementById('an-date').value,cat:document.getElementById('an-cat').value,content:document.getElementById('an-content').value.trim(),star:curStar};if(editAreaIdx!==null)D.area_notes[editAreaIdx]=entry;else D.area_notes.unshift(entry);sv('area_notes');closeM('m-area');rAreas();}
+function deleteArea(i){D.area_notes.splice(i,1);sv('area_notes');closeM('m-area');rAreas();}
+
+// ══ TODO ══
+let editTodoId=null;
+function addTodo(){const v=document.getElementById('todo-new').value.trim();if(!v)return;D.todos.push({id:Date.now(),text:v,done:false});sv('todos');document.getElementById('todo-new').value='';rTodos();}
+function toggleTodo(id){const t=D.todos.find(t=>t.id===id);if(t){t.done=!t.done;sv('todos');rTodos();}}
+function openEditTodo(id){editTodoId=id;const t=D.todos.find(t=>t.id===id);if(t)document.getElementById('todo-edit-inp').value=t.text;openM('m-todo');setTimeout(()=>document.getElementById('todo-edit-inp').focus(),300);}
+function saveEditTodo(){const v=document.getElementById('todo-edit-inp').value.trim();if(!v)return;const t=D.todos.find(t=>t.id===editTodoId);if(t){t.text=v;sv('todos');}closeM('m-todo');rTodos();}
+function deleteEditTodo(){D.todos=D.todos.filter(t=>t.id!==editTodoId);sv('todos');closeM('m-todo');rTodos();}
+function rTodos(){const el=document.getElementById('todo-list');if(!D.todos.length){el.innerHTML='<div style="padding:8px 0;font-size:13px;color:var(--hi);">タスクはありません</div>';return;}el.innerHTML=D.todos.map(t=>`<div class="ti"><div class="tc${t.done?' dn':''}" onclick="toggleTodo(${t.id})"></div><div style="font-size:13px;color:${t.done?'var(--hi)':'var(--tx)'};flex:1;text-decoration:${t.done?'line-through':'none'};line-height:1.5;">${t.text}</div><div style="display:flex;gap:2px;flex-shrink:0;"><button class="ib" onclick="openEditTodo(${t.id})">✏️</button><button class="ib" onclick="(D.todos=D.todos.filter(x=>x.id!==${t.id}),sv('todos'),rTodos())">✕</button></div></div>`).join('');}
+
+// ══ RENDER HOME ══
+function rHome(){
+  const now=new Date();
+  document.getElementById('home-date-head').textContent=now.getFullYear()+'年'+(now.getMonth()+1)+'月'+now.getDate()+'日';
+  document.getElementById('home-avatar').textContent=D.name?D.name.slice(0,1):'?';
+  const days=daysUntil(D.target_date);
+  document.getElementById('cd-num').innerHTML=(days!==null?days:'—')+'<span>日</span>';
+  document.getElementById('cd-target').innerHTML=`<b>${D.target_date?fmtDate(D.target_date):'未設定'}</b>${D.target_place?' · '+D.target_place:''}`;
+  const sav=curSav(),tgt=D.target_savings||0,pct=tgt?Math.min(100,Math.round(sav/tgt*100)):0;
+  document.getElementById('home-pct').textContent=pct+'%';
+  document.getElementById('home-sav').innerHTML=fmtYen(sav)+(tgt?`<span style="font-size:12px;color:var(--hi);font-weight:400;margin-left:2px;">/${fmtYen(tgt)}</span>`:'');
+  document.getElementById('home-sav-pct').textContent=pct+'%';
+  document.getElementById('home-gauge').style.width=pct+'%';
+  const exSkills=D.skills.filter(s=>s.is_exam&&s.exam_date);
+  const ns=document.getElementById('norma-sec');
+  if(exSkills.length){const mins=exSkills.reduce((sum,s)=>sum+(calcNorma(s)||0),0);ns.innerHTML=`<div class="nb"><div style="font-size:22px;">🎯</div><div style="flex:1;"><div style="font-size:11px;color:rgba(255,255,255,0.7);">今日の学習ノルマ</div><div style="font-family:var(--fm);font-size:20px;font-weight:700;color:white;">${mins}<span style="font-size:12px;font-weight:400;color:rgba(255,255,255,0.6);">分</span></div></div><div style="font-size:11px;color:rgba(255,255,255,0.45);">${exSkills.length}科目</div></div>`;}else ns.innerHTML='';
+  document.getElementById('home-skills').innerHTML=!D.skills.length?'<div style="text-align:center;padding:18px 0;color:var(--hi);font-size:13px;">スキルを追加してみましょう</div>':D.skills.slice(0,3).map((s,si,arr)=>{const p=Math.min(100,Math.round((s.total_logged_hours/s.target_hours)*100));const border=si<arr.slice(0,3).length-1?'border-bottom:0.5px solid var(--wa);':'';return `<div style="display:flex;align-items:center;gap:12px;padding:10px 0;${border}"><div style="width:36px;height:36px;border-radius:10px;background:var(--cr);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">${s.is_exam?'📋':'🌿'}</div><div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:500;">${s.name}</div><div style="font-size:11px;color:var(--hi);">${s.total_logged_hours.toFixed(1)}h / ${s.target_hours}h</div><div style="height:4px;background:var(--wa);border-radius:2px;margin-top:4px;overflow:hidden;"><div style="height:100%;width:${p}%;background:var(--sa);border-radius:2px;"></div></div></div><div style="font-family:var(--fm);font-size:13px;color:var(--su);">${p}%</div></div>`;}).join('');
+  document.getElementById('home-diary').innerHTML=!D.diaries.length?'<div style="text-align:center;padding:14px 0;color:var(--hi);font-size:13px;">まだ記録がありません</div>':(d=>`<div style="font-size:10px;color:var(--hi);font-family:var(--fm);margin-bottom:3px;">${d.date}</div><div style="font-size:13px;line-height:1.6;">${d.content.length>80?d.content.slice(0,80)+'…':d.content}</div>`)(D.diaries[0]);
+}
+
+// ══ RENDER SKILLS ══
+function rSkills(){
+  const c=document.getElementById('skills-list');
+  if(!D.skills.length){c.innerHTML=`<div class="cd" style="text-align:center;padding:28px 16px;color:var(--hi);"><div style="font-size:34px;margin-bottom:8px;">📚</div><div style="font-size:14px;">まだスキルが登録されていません</div></div>`;return;}
+  c.innerHTML=D.skills.map((s,i)=>{
+    const p=Math.min(100,Math.round((s.total_logged_hours/s.target_hours)*100));
+    const norma=s.is_exam?calcNorma(s):null;const dLeft=s.exam_date?daysUntil(s.exam_date):null;
+    const bkCount=(s.books||[]).length;
+    const totalPages=(s.logs||[]).reduce((sum,l)=>(l.page_from&&l.page_to)?sum+(l.page_to-l.page_from):sum,0);
+    return `<div class="cd" style="padding:16px;">
+      <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:12px;">
+        <div style="width:42px;height:42px;border-radius:12px;background:var(--cr);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">${s.is_exam?'📋':'🌿'}</div>
+        <div style="flex:1;"><div style="font-size:15px;font-weight:700;color:var(--e);">${s.name}</div>
+          <div style="display:flex;gap:5px;margin-top:4px;flex-wrap:wrap;">
+            <span class="ch ${s.is_exam?'cha':'chg'}">${s.is_exam?'資格':'スキル'}</span>
+            ${dLeft!==null?`<span class="ch chs">試験まで${dLeft}日</span>`:''}
+            ${bkCount?`<span class="ch chg">📖 ${bkCount}冊</span>`:''}
+          </div>
+        </div>
+        <button class="ib" onclick="openEditSkill(${i})">✏️</button>
+        <button class="ib" onclick="deleteSkill(${i})">✕</button>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:5px;">
+        <span style="font-size:12px;color:var(--hi);">進捗</span>
+        <span style="font-family:var(--fm);font-size:12px;color:var(--su);">${s.total_logged_hours.toFixed(1)}h / ${s.target_hours}h${totalPages?` · 計${totalPages}p`:''}</span>
+      </div>
+      <div class="gt" style="height:7px;"><div class="gf" style="width:${p}%;"></div></div>
+      ${norma!==null?`<div style="margin-top:10px;padding:8px 12px;background:var(--cr);border-radius:8px;display:flex;justify-content:space-between;align-items:center;"><span style="font-size:12px;color:var(--su);">今日のノルマ</span><span style="font-family:var(--fm);font-size:15px;font-weight:700;color:var(--am);">${norma}分</span></div>`:''}
+      <div style="display:flex;gap:8px;margin-top:10px;">
+        <button class="btn bp" style="flex:1;padding:11px;" onclick="openStudy(${i})">⏱ 学習セッション</button>
+        <button class="btn bg" style="padding:11px 14px;" onclick="openBooks(${i})">📖</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ══ RENDER SAVINGS (BUG FIXED) ══
+function rSavings(){
+  const sav=curSav(),tgt=D.target_savings||0,pct=tgt?Math.min(100,Math.round(sav/tgt*100)):0,circ=226.19;
+  document.getElementById('sav-pct-n').textContent=pct;
+  document.getElementById('sav-cur').textContent=fmtYen(sav);
+  document.getElementById('sav-tgt-d').textContent=tgt?fmtYen(tgt):'未設定';
+  document.getElementById('sav-rem').textContent=tgt?'残り '+fmtYen(Math.max(0,tgt-sav)):'設定から目標を入力してください';
+  document.getElementById('sav-circle').setAttribute('stroke-dashoffset',circ-(circ*pct/100));
+  // GRAPH — no early return here, fall through to history
+  const g=document.getElementById('sav-graph');
+  if(!D.savings_log.length){
+    g.innerHTML='<div style="flex:1;text-align:center;padding:18px 0;color:var(--hi);font-size:12px;">まだ記録がありません</div>';
+  } else {
+    const logs=D.savings_log.slice(-8);
+    const maxA=Math.max(...logs.map(l=>l.amount),1);
+    g.innerHTML=logs.map((l,i)=>{
+      const h=Math.max(8,Math.round((l.amount/maxA)*90));
+      return `<div class="svb-wrap"><div class="svb${i===logs.length-1?' cur':''}" style="height:${h}px;"></div><div style="font-size:8px;color:var(--hi);font-family:var(--fm);">${l.created_at.slice(5).replace('-','/')}</div></div>`;
+    }).join('');
+  }
+  // HISTORY — always rendered, index = original array index (descending display)
+  const hist=document.getElementById('sav-hist');
+  if(!D.savings_log.length){
+    hist.innerHTML='<div style="color:var(--hi);font-size:13px;padding:8px 0;">記録がありません</div>';
+    return;
+  }
+  // Build display list as [{origIdx, entry}] in reverse chronological order
+  const displayList=D.savings_log.map((l,i)=>({i,l})).reverse().slice(0,10);
+  hist.innerHTML=displayList.map(({i:origIdx,l},di)=>{
+    // prev in display = next entry which is older = savings_log[origIdx-1]
+    const prevEntry=origIdx>0?D.savings_log[origIdx-1]:null;
+    const diff=prevEntry!=null?l.amount-prevEntry.amount:null;
+    const ds=diff!==null?(diff>=0?`<span style="color:var(--mo);font-size:11px;">+${fmtYen(diff)}</span>`:`<span style="color:var(--ru);font-size:11px;">${fmtYen(diff)}</span>`):'';
+    return `<div class="sav-row">
+      <div><div style="font-family:var(--fm);font-size:13px;">${fmtYen(l.amount)}</div><div style="font-size:11px;color:var(--hi);">${l.created_at}</div></div>
+      <div style="display:flex;align-items:center;gap:6px;">${ds}<button class="ib" onclick="openEditSav(${origIdx})">✏️</button></div>
+    </div>`;
+  }).join('');
+}
+
+// ══ RENDER DIARY ══
+function rDiary(){
+  const now=new Date(),y=now.getFullYear(),m=now.getMonth();
+  document.getElementById('diary-month').textContent=y+'年'+(m+1)+'月';
+  document.getElementById('cal-head').innerHTML=['日','月','火','水','木','金','土'].map(d=>`<div class="cd-lb">${d}</div>`).join('');
+  const fd=new Date(y,m,1).getDay(),dim=new Date(y,m+1,0).getDate(),td=now.getDate();
+  const dd=new Set(D.diaries.map(d=>d.date));let html='';
+  for(let i=0;i<fd;i++)html+='<div class="cd-d em"></div>';
+  for(let d=1;d<=dim;d++){const ds=y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');const has=dd.has(ds),isT=d===td;html+=`<div class="cd-d${isT?' td':has?' he':''}" onclick="calClick('${ds}')">${d}${has&&!isT?'<div class="cd-dot"></div>':''}</div>`;}
+  document.getElementById('cal-body').innerHTML=html;
+  const c=document.getElementById('diary-list');
+  if(!D.diaries.length){c.innerHTML=`<div class="cd" style="text-align:center;padding:22px;color:var(--hi);font-size:13px;"><div style="font-size:30px;margin-bottom:8px;">📖</div>まだ日誌がありません</div>`;return;}
+  c.innerHTML='<div style="padding:0 16px 8px;">'+D.diaries.slice(0,15).map((d,i)=>{const lk=d.linked_skill_id?D.skills.find(s=>s.id==d.linked_skill_id):null;return `<div class="le" style="cursor:pointer;" onclick="openEditDiary(${i})"><div style="display:flex;justify-content:space-between;"><div style="font-size:10px;color:var(--hi);font-family:var(--fm);margin-bottom:3px;">${d.date}</div><span style="font-size:11px;color:var(--sk);">編集 ✏️</span></div><div style="font-size:13px;line-height:1.6;">${d.content.length>60?d.content.slice(0,60)+'…':d.content}</div>${lk?`<div style="margin-top:6px;"><span style="padding:3px 8px;background:var(--cr);color:var(--su);border-radius:6px;font-size:11px;font-weight:500;">${lk.name}</span></div>`:''}</div>`;}).join('')+'</div>';
+}
+function calClick(ds){const i=D.diaries.findIndex(d=>d.date===ds);if(i>=0)openEditDiary(i);else{editDiaryIdx=null;document.getElementById('m-diary-title').textContent=fmtDate(ds)+'の記録';document.getElementById('diar-date').value=ds;document.getElementById('diar-content').value='';popDiarySel('diar-skill');setDiaryBtns(false,null);openM('m-diary');}}
+
+// ══ RENDER AREAS ══
+function rAreas(){
+  const c=document.getElementById('area-list');
+  if(!D.area_notes.length){
+    c.innerHTML=`<div style="text-align:center;padding:40px 24px;color:var(--hi);"><div style="font-size:40px;margin-bottom:12px;">🗺️</div><div style="font-size:14px;margin-bottom:4px;color:var(--su);font-weight:500;">エリアノートがありません</div><div style="font-size:12px;">訪問した街や候補地の情報を<br>記録していきましょう</div></div>`;
+    return;
+  }
+  c.innerHTML=D.area_notes.map((a,i)=>{
+    const stars=a.star?'★'.repeat(a.star)+'☆'.repeat(5-a.star):'';
+    const catCls=catClass[a.cat]||'general';
+    const preview=a.content?(a.content.length>55?a.content.slice(0,55)+'…':a.content):'';
+    return `<div class="an-card" onclick="openEditArea(${i})">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px;">
+        <div style="font-size:15px;font-weight:700;color:var(--e);flex:1;">${a.name}</div>
+        ${stars?`<div style="font-size:13px;color:var(--am);flex-shrink:0;letter-spacing:-2px;">${stars}</div>`:''}
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap;">
+        <span class="an-tag ${catCls}">${catLabel[a.cat]||catLabel.general}</span>
+        ${a.date?`<span style="font-size:11px;color:var(--hi);font-family:var(--fm);">${a.date}</span>`:''}
+      </div>
+      ${preview?`<div style="font-size:13px;color:var(--su);line-height:1.55;">${preview}</div>`:''}
+      <div style="font-size:11px;color:var(--hi);margin-top:6px;text-align:right;">タップして編集 ✏️</div>
+    </div>`;
+  }).join('');
+}
+
+// ══ RENDER SETTINGS ══
+function rSettings(){
+  document.getElementById('set-name').textContent=D.name||'未設定';
+  document.getElementById('set-date').textContent=D.target_date?fmtDate(D.target_date):'未設定';
+  document.getElementById('set-place').textContent=D.target_place||'未設定';
+  document.getElementById('set-sav').textContent=D.target_savings?fmtYen(D.target_savings):'未設定';
+  rTodos();
+}
+
+// ══ INIT ══
+rHome();setSkillType(true);
+</script>
+</body>
+</html>
