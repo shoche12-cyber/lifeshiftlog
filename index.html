@@ -41,17 +41,27 @@ html,body{
   overflow: hidden;
   margin: 0 auto;
 }
-.scr{display:none;flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:calc(72px + var(--sb));}
-.scr.on{display:block;}
+.scr{
+  display: none;
+  flex-direction: column; /* 縦に並べる */
+  flex: 1;                /* 親要素 (#app) の余白をすべて埋める */
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: calc(80px + var(--sb)); /* タブと重ならないよう余白を確保 */
+}
+.scr.on{
+  display: flex; /* block から flex に変更 */
+}
 /* NAV — fixed to viewport, centred under #app */
 .nav{
-  position: absolute; /* fixed から absolute に変更 */
+  /* position は absolute のままでOK */
+  position: absolute;
   bottom: 0;
   left: 0;
   width: 100%;
-  /* transform: translateX(-50%); を削除 */
-  /* max-width: 430px; を削除（親要素に従うため） */
-
+  
+  /* 以下はそのまま */
   background: rgba(250,247,242,0.96);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
