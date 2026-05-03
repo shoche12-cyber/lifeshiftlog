@@ -26,18 +26,23 @@ body{font-family:var(--fb);background:var(--pa);color:var(--tx);position:fixed;w
 .scr{display:none;flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:calc(72px + var(--sb));}
 .scr.on{display:block;}
 /* NAV — fixed to viewport, centred under #app */
-.nav{
-  position:fixed;
-  bottom:0;left:50%;
-  transform:translateX(-50%);
-  width:100%;max-width:430px;
-  background:rgba(250,247,242,0.96);
-  backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
-  border-top:0.5px solid rgba(74,103,65,0.18);
-  /* top padding 8px, bottom = 8px + home indicator */
-  padding:8px 0 max(var(--sb), 8px);
-  display:flex;justify-content:space-around;
-  z-index:100;
+.nav {
+  /* position: fixed; から absolute に変更（#appの中での絶対位置にする） */
+  position: absolute; 
+  bottom: 0;
+  left: 0; /* center寄せのtransformが不要になります */
+  transform: none; 
+  width: 100%;
+  /* max-width: 430px; は不要になります（親に追従するため） */
+  
+  background: rgba(250,247,242,0.96);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-top: 0.5px solid rgba(74,103,65,0.18);
+  padding: 8px 0 max(var(--sb), 8px);
+  display: flex;
+  justify-content: space-around;
+  z-index: 100;
 }
 .ni{display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 10px;cursor:pointer;transition:all 0.2s;min-width:52px;}
 .ni-ic{font-size:20px;transition:transform 0.2s;}
