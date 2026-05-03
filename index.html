@@ -16,59 +16,78 @@
   --cr:#F2EDE4;--pa:#FAF7F2;--wa:#E8DFD0;
   --am:#C4853A;--ru:#A0522D;--sk:#5B8FA8;--re:#B94040;
   --tx:#1C2B1A;--su:#5A7055;--hi:#8FAA88;
-  --st:env(safe-area-inset-top,44px);--sb:env(safe-area-inset-bottom,20px);
+  --nav-bg:rgba(250,247,242,0.97);
   --fd:'DM Serif Display',serif;--fb:'Noto Sans JP',sans-serif;--fm:'Space Mono',monospace;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-html{height:100%;}
+
+/* ── ベース: iOSのビューポート全体を確実に使う ── */
+html,body{
+  width:100%;height:100%;
+  overflow:hidden;
+  background:var(--nav-bg);/* 画面端まで同色で埋める */
+}
 body{
-  font-family:var(--fb);background:var(--pa);color:var(--tx);
-  /* iOSでアドレスバーを含まない実際の画面高さに固定 */
-  position:fixed;top:0;left:0;right:0;bottom:0;
-  overflow:hidden;
+  font-family:var(--fb);color:var(--tx);
+  /* Safariのアドレスバー伸縮に追従しない */
+  position:fixed;inset:0;
 }
+
+/* ── アプリ全体コンテナ ── */
 #app{
-  position:fixed;top:0;left:50%;
-  transform:translateX(-50%);
-  width:100%;max-width:430px;
-  /* 画面全体を使う */
-  height:100%;height:100dvh;
+  position:absolute;inset:0;
+  max-width:430px;margin:0 auto;
+  /* flexで上から: スクリーン(伸縮) → ナビ(固定) */
+  display:flex;flex-direction:column;
   overflow:hidden;
+  background:var(--pa);
 }
-/* スクロールエリア: ナビの高さぶん下に余白 */
+
+/* ── スクロールエリア ── */
 .scr{
   display:none;
-  position:absolute;top:0;left:0;right:0;
-  /* bottom = ナビの高さ(約56px) + ホームインジケーター */
-  bottom:calc(56px + env(safe-area-inset-bottom, 0px));
-  overflow-y:auto;overflow-x:hidden;
+  flex:1;           /* ナビを除いた残り全部 */
+  overflow-y:auto;
+  overflow-x:hidden;
   -webkit-overflow-scrolling:touch;
+  /* ページヘッダーはsticky内で対応するのでここでは不要 */
 }
 .scr.on{display:block;}
-/* NAV — appコンテナの底に絶対配置 */
+
+/* ── タブバー ── */
 .nav{
-  position:absolute;
-  bottom:0;left:0;right:0;
-  background:rgba(250,247,242,0.96);
-  backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  flex-shrink:0;    /* 絶対に縮まない */
+  display:flex;
+  justify-content:space-around;
+  background:var(--nav-bg);
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
   border-top:0.5px solid rgba(74,103,65,0.18);
-  padding:8px 0;
-  /* ホームインジケーター分だけ追加の余白 */
-  padding-bottom:calc(8px + env(safe-area-inset-bottom, 0px));
-  display:flex;justify-content:space-around;
-  z-index:100;
+  /* アイコン+ラベル分 + ホームインジケーター */
+  padding-top:8px;
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  /* paddingが0のときも最低8px確保 */
+  min-height:calc(56px + env(safe-area-inset-bottom,0px));
 }
-.ni{display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 10px;cursor:pointer;transition:all 0.2s;min-width:52px;}
+.ni{display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 10px 8px;cursor:pointer;transition:all 0.2s;min-width:52px;}
 .ni-ic{font-size:20px;transition:transform 0.2s;}
 .ni-lb{font-size:10px;color:var(--hi);font-weight:500;letter-spacing:0.02em;transition:color 0.2s;}
 .ni.on .ni-lb{color:var(--mo);font-weight:700;}
 .ni.on .ni-ic{transform:scale(1.1);}
-/* HEADER */
-.ph{padding:calc(10px + var(--st)) 20px 12px;background:var(--pa);position:sticky;top:0;z-index:10;}
+
+/* ── ページヘッダー ── */
+/* safe-area-inset-topでステータスバー分下げる */
+.ph{
+  padding-top:env(safe-area-inset-top,44px);
+  padding-left:20px;padding-right:20px;padding-bottom:12px;
+  background:var(--pa);
+  position:sticky;top:0;z-index:10;
+}
 .ph .ph-row{display:flex;align-items:center;justify-content:space-between;}
 .pt{font-family:var(--fd);font-size:25px;color:var(--e);line-height:1.1;}
 .ps{font-size:11px;color:var(--hi);margin-top:2px;font-weight:300;letter-spacing:0.04em;}
-/* CARDS */
+
+/* ── CARDS ── */
 .cd{background:white;border-radius:16px;border:0.5px solid rgba(74,103,65,0.12);padding:16px;margin:0 16px 12px;}
 .cl{font-size:11px;color:var(--hi);font-weight:500;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;}
 /* COUNTDOWN */
@@ -99,7 +118,8 @@ body{
 /* FAB */
 .fab{
   position:absolute;
-  bottom:calc(56px + env(safe-area-inset-bottom, 0px) + 12px);
+  /* ナビの高さ + ホームインジケーター + 余白 */
+  bottom:calc(env(safe-area-inset-bottom,0px) + 56px + 12px);
   right:16px;
   width:50px;height:50px;border-radius:50%;
   background:var(--mo);color:white;font-size:24px;
@@ -111,7 +131,13 @@ body{
 /* MODAL */
 .mo{display:none;position:fixed;inset:0;background:rgba(28,43,26,0.5);z-index:200;align-items:flex-end;}
 .mo.on{display:flex;}
-.ms{background:var(--pa);border-radius:24px 24px 0 0;padding:12px 20px calc(20px + var(--sb));width:100%;max-height:90vh;overflow-y:auto;animation:su 0.27s cubic-bezier(0.4,0,0.2,1);}
+.ms{
+  background:var(--pa);border-radius:24px 24px 0 0;
+  padding:12px 20px;
+  padding-bottom:calc(20px + env(safe-area-inset-bottom,0px));
+  width:100%;max-height:90vh;overflow-y:auto;
+  animation:su 0.27s cubic-bezier(0.4,0,0.2,1);
+}
 .mh{width:36px;height:4px;background:var(--wa);border-radius:2px;margin:0 auto 14px;}
 .mt{font-family:var(--fd);font-size:21px;color:var(--e);margin-bottom:14px;}
 @keyframes su{from{transform:translateY(100%);}to{transform:translateY(0);}}
