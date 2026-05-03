@@ -46,6 +46,7 @@ body{font-family:var(--fb);background:var(--pa);color:var(--tx);position:fixed;w
 .ni.on .ni-ic{transform:scale(1.1);}
 /* HEADER */
 .ph{padding:calc(10px + var(--st)) 20px 12px;background:var(--pa);position:sticky;top:0;z-index:10;}
+.ph .ph-row{display:flex;align-items:center;justify-content:space-between;}
 .pt{font-family:var(--fd);font-size:25px;color:var(--e);line-height:1.1;}
 .ps{font-size:11px;color:var(--hi);margin-top:2px;font-weight:300;letter-spacing:0.04em;}
 /* CARDS */
@@ -171,7 +172,7 @@ select.fi option{background:var(--pa);}
         <div style="font-size:10px;color:var(--hi);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:2px;">Life Shift Log</div>
         <div style="font-family:var(--fd);font-size:22px;color:var(--e);" id="home-date-head"></div>
       </div>
-      <div id="home-avatar" onclick="switchTab('settings')" style="width:34px;height:34px;border-radius:50%;background:var(--e);display:flex;align-items:center;justify-content:center;color:white;font-size:13px;font-weight:700;margin-top:calc(4px + var(--st));cursor:pointer;flex-shrink:0;"></div>
+      <div id="home-avatar" onclick="switchTab('settings')" style="width:34px;height:34px;border-radius:50%;background:var(--e);display:flex;align-items:center;justify-content:center;color:white;font-size:13px;font-weight:700;cursor:pointer;flex-shrink:0;"></div>
     </div>
   </div>
   <div class="cc">
@@ -310,7 +311,7 @@ select.fi option{background:var(--pa);}
   <div class="ph">
     <div style="display:flex;align-items:center;justify-content:space-between;">
       <div><div class="pt">エリアノート</div><div class="ps">訪問地の記録 & 農業メモ</div></div>
-      <button class="btn bp" onclick="openNewArea()" style="padding:8px 14px;font-size:13px;margin-top:calc(var(--st) + 2px);">＋ 追加</button>
+      <button class="btn bp" onclick="openNewArea()" style="padding:8px 14px;font-size:13px;">＋ 追加</button>
     </div>
   </div>
   <div id="area-list"></div>
