@@ -2,7 +2,6 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -20,21 +19,39 @@
   --fd:'DM Serif Display',serif;--fb:'Noto Sans JP',sans-serif;--fm:'Space Mono',monospace;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-html,body{height:100%;overflow:hidden;}
-body{font-family:var(--fb);background:var(--pa);color:var(--tx);position:fixed;width:100%;height:100%;}
-#app{display:flex;flex-direction:column;height:100%;max-width:430px;margin:0 auto;position:relative;overflow:hidden;}
+html,body{
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* 全体のスクロールを防ぐ */
+}
+{
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* 全体のスクロールを防ぐ */
+}
+#app{
+  display: flex;
+  flex-direction: column;
+  height: 100dvh; /* 100% から 100dvh に変更 */
+  width: 100%;
+  max-width: 430px;
+  position: relative; /* 子要素の absolute 基準にする */
+  overflow: hidden;
+  margin: 0 auto;
+}
 .scr{display:none;flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:calc(72px + var(--sb));}
 .scr.on{display:block;}
 /* NAV — fixed to viewport, centred under #app */
-.nav {
-  /* position: fixed; から absolute に変更（#appの中での絶対位置にする） */
-  position: absolute; 
+.nav{
+  position: absolute; /* fixed から absolute に変更 */
   bottom: 0;
-  left: 0; /* center寄せのtransformが不要になります */
-  transform: none; 
+  left: 0;
   width: 100%;
-  /* max-width: 430px; は不要になります（親に追従するため） */
-  
+  /* transform: translateX(-50%); を削除 */
+  /* max-width: 430px; を削除（親要素に従うため） */
+
   background: rgba(250,247,242,0.96);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
