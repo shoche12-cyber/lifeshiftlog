@@ -2,11 +2,11 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Life Shift">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <title>Life Shift Log</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Serif+Display:ital@0;1&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -23,10 +23,22 @@
 html,body{height:100%;overflow:hidden;}
 body{font-family:var(--fb);background:var(--pa);color:var(--tx);position:fixed;width:100%;height:100%;}
 #app{display:flex;flex-direction:column;height:100%;max-width:430px;margin:0 auto;position:relative;overflow:hidden;}
-.scr{display:none;flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:calc(76px + var(--sb));}
+.scr{display:none;flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:calc(72px + var(--sb));}
 .scr.on{display:block;}
-/* NAV */
-.nav{position:absolute;bottom:0;left:0;right:0;background:rgba(250,247,242,0.94);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:0.5px solid rgba(74,103,65,0.18);padding:8px 0 calc(8px + var(--sb));display:flex;justify-content:space-around;z-index:100;}
+/* NAV — fixed to viewport, centred under #app */
+.nav{
+  position:fixed;
+  bottom:0;left:50%;
+  transform:translateX(-50%);
+  width:100%;max-width:430px;
+  background:rgba(250,247,242,0.96);
+  backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  border-top:0.5px solid rgba(74,103,65,0.18);
+  /* top padding 8px, bottom = 8px + home indicator */
+  padding:8px 0 max(var(--sb), 8px);
+  display:flex;justify-content:space-around;
+  z-index:100;
+}
 .ni{display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 10px;cursor:pointer;transition:all 0.2s;min-width:52px;}
 .ni-ic{font-size:20px;transition:transform 0.2s;}
 .ni-lb{font-size:10px;color:var(--hi);font-weight:500;letter-spacing:0.02em;transition:color 0.2s;}
@@ -65,7 +77,7 @@ body{font-family:var(--fb);background:var(--pa);color:var(--tx);position:fixed;w
 /* NORMA */
 .nb{background:var(--am);color:white;border-radius:12px;padding:12px 16px;margin:0 16px 12px;display:flex;align-items:center;gap:12px;}
 /* FAB */
-.fab{position:absolute;bottom:calc(80px + var(--sb));right:16px;width:50px;height:50px;border-radius:50%;background:var(--mo);color:white;font-size:24px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(74,103,65,0.35);cursor:pointer;z-index:99;transition:all 0.2s;}
+.fab{position:fixed;bottom:calc(max(var(--sb),8px) + 64px);right:calc(50% - min(50%,215px) + 16px);width:50px;height:50px;border-radius:50%;background:var(--mo);color:white;font-size:24px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(74,103,65,0.35);cursor:pointer;z-index:99;transition:all 0.2s;}
 .fab:active{transform:scale(0.92);}
 /* MODAL */
 .mo{display:none;position:fixed;inset:0;background:rgba(28,43,26,0.5);z-index:200;align-items:flex-end;}
