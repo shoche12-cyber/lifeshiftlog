@@ -2,992 +2,979 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Life Shift">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Life Shift Log</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Serif+Display&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500;600&family=Noto+Sans+JP:wght@300;400;500;600&family=Playfair+Display:wght@400;500&display=swap" rel="stylesheet">
 <style>
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   VARIABLES
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-:root {
-  --green-dark:  #2D3B2A;
-  --green-mid:   #4A6741;
-  --green-light: #7A9E72;
-  --green-pale:  #B8CDB4;
-  --cream:       #F2EDE4;
-  --paper:       #FAF7F2;
-  --warm:        #E8DFD0;
-  --amber:       #C4853A;
-  --rust:        #A0522D;
-  --sky:         #5B8FA8;
-  --red:         #B94040;
-  --text:        #1C2B1A;
-  --sub:         #5A7055;
-  --hint:        #8FAA88;
-  --serif:       'DM Serif Display', serif;
-  --sans:        'Noto Sans JP', sans-serif;
-  --mono:        'Space Mono', monospace;
-}
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   RESET
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0; padding: 0;
-  -webkit-tap-highlight-color: transparent;
-}
-input, button, select, textarea {
-  font-family: var(--sans);
-  font-size: 14px;
-}
-input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
-select { -webkit-appearance: none; }
-::-webkit-scrollbar { display: none; }
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   ROOT LAYOUT  — iPhoneネイティブ方式
-   html/body は触らず、#shell が画面を占有
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-html { height: 100%; }
-body {
-  height: 100%;
-  /* タブバーと同じ色で画面端の隙間を消す */
-  background: rgba(250, 247, 242, 0.97);
-  color: var(--text);
-  font-family: var(--sans);
-  overflow: hidden;
-}
-
-#shell {
-  position: fixed;
-  /* 左右中央、最大430px、それ以外は画面全体 */
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  margin: 0 auto;
-  max-width: 430px;
-  display: flex;
-  flex-direction: column;
-  /* shellの背景もタブバーと同色 */
-  background: var(--paper);
-}
-
-/* スクリーン: 残り全部を使ってスクロール */
-.scr {
-  display: none;
-  flex: 1;
-  min-height: 0; /* flexアイテムがはみ出さないよう必須 */
-  overflow-y: auto;
-  overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
-  background: var(--paper);
-}
-.scr.on { display: block; }
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   TAB BAR
-   flex-shrink:0 で絶対に縮まない
-   padding-bottom で home indicator を吸収
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-#tabbar {
-  flex-shrink: 0;
-  display: flex;
-  justify-content: space-around;
-  align-items: flex-start;
-  padding-top: 10px;
-  /* ホームインジケーター分を padding-bottom で確保 */
-  padding-bottom: env(safe-area-inset-bottom, 0px);
-  background: rgba(250, 247, 242, 0.97);
-  border-top: 0.5px solid rgba(74, 103, 65, 0.2);
-}
-.tab {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3px;
-  cursor: pointer;
-  padding: 0 8px 4px;
-  min-width: 52px;
-}
-.tab-ic { font-size: 22px; transition: transform 0.15s; }
-.tab-lb { font-size: 10px; color: var(--hint); font-weight: 500; }
-.tab.on .tab-lb { color: var(--green-mid); font-weight: 700; }
-.tab.on .tab-ic { transform: scale(1.1); }
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   PAGE HEADER
-   ステータスバー分だけ padding-top
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-.ph {
-  padding: env(safe-area-inset-top, 44px) 20px 12px;
-  background: var(--paper);
-  position: sticky;
-  top: 0;
-  z-index: 10;
-}
-.ph-home {
-  padding: env(safe-area-inset-top, 44px) 20px 8px;
-  background: var(--paper);
-  position: sticky;
-  top: 0;
-  z-index: 10;
-}
-.page-title {
-  font-family: var(--serif);
-  font-size: 26px;
-  color: var(--green-dark);
-  line-height: 1.1;
-}
-.page-sub {
-  font-size: 11px;
-  color: var(--hint);
-  margin-top: 2px;
-  font-weight: 300;
-}
-
-/* FAB */
-.fab {
-  position: absolute;
-  right: 16px;
-  /* タブバーの上に出す: タブバーの高さ(54px) + home indicator + 余白 */
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 54px + 12px);
-  width: 50px; height: 50px;
-  border-radius: 50%;
-  background: var(--green-mid);
-  color: white; font-size: 24px;
-  display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 4px 16px rgba(74,103,65,0.4);
-  cursor: pointer; z-index: 50;
-  transition: transform 0.15s;
-}
-.fab:active { transform: scale(0.92); }
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   CARDS & COMMON
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-.card {
-  background: white;
-  border-radius: 16px;
-  border: 0.5px solid rgba(74,103,65,0.12);
-  padding: 16px;
-  margin: 0 16px 12px;
-}
-.card-label {
-  font-size: 11px;
-  color: var(--hint);
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  margin-bottom: 8px;
-}
-.section-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 16px;
-  margin-bottom: 8px;
-}
-.section-title { font-size: 15px; font-weight: 700; color: var(--green-dark); }
-.section-link  { font-size: 12px; color: var(--sky); cursor: pointer; font-weight: 500; }
-
-/* COUNTDOWN CARD */
-.countdown-card {
-  background: var(--green-dark);
-  color: white;
-  border-radius: 20px;
-  padding: 20px;
-  margin: 6px 16px 14px;
-  position: relative;
-  overflow: hidden;
-}
-.countdown-card::before {
-  content: '';
-  position: absolute;
-  top: -40px; right: -40px;
-  width: 150px; height: 150px;
-  border-radius: 50%;
-  background: rgba(122,158,114,0.15);
-}
-.cd-label { font-size: 10px; color: rgba(255,255,255,0.4); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 4px; }
-.cd-days { font-family: var(--serif); font-size: 56px; line-height: 1; color: white; letter-spacing: -2px; }
-.cd-days span { font-size: 18px; color: rgba(255,255,255,0.5); margin-left: 2px; letter-spacing: 0; }
-.cd-target { font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 5px; }
-.cd-target b { color: rgba(255,255,255,0.75); font-weight: 500; }
-
-/* GAUGE */
-.gauge-track { height: 8px; background: var(--warm); border-radius: 4px; overflow: hidden; margin: 7px 0; }
-.gauge-fill  { height: 100%; background: linear-gradient(90deg, var(--green-light), var(--green-mid)); border-radius: 4px; transition: width 0.6s ease; }
-
-/* NORMA BADGE */
-.norma-badge {
-  background: var(--amber);
-  color: white;
-  border-radius: 12px;
-  padding: 12px 16px;
-  margin: 0 16px 12px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-/* BUTTONS */
-.btn { border: none; border-radius: 10px; padding: 10px 16px; font-weight: 500; cursor: pointer; transition: all 0.15s; }
-.btn:active { transform: scale(0.97); }
-.btn-p  { background: var(--green-mid);  color: white; }
-.btn-g  { background: var(--cream);      color: var(--sub); }
-.btn-d  { background: #FFF0F0;           color: var(--red); }
-.btn-am { background: #FDF3E3;           color: var(--amber); }
-.btn-full { display: block; width: 100%; padding: 13px; border-radius: 12px; text-align: center; }
-
-/* FORM */
-.form-group { margin-bottom: 12px; }
-.form-label { display: block; font-size: 12px; color: var(--sub); font-weight: 500; margin-bottom: 4px; }
-.form-input {
-  width: 100%;
-  padding: 10px 12px;
-  border: 1px solid var(--warm);
-  border-radius: 10px;
-  background: var(--paper);
-  color: var(--text);
-  outline: none;
-}
-.form-input:focus { border-color: var(--green-light); }
-textarea.form-input { min-height: 90px; resize: none; }
-
-/* CHIPS */
-.chip { display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 500; }
-.chip-g  { background: var(--cream);  color: var(--green-mid); }
-.chip-am { background: #FDF3E3;       color: var(--amber); }
-.chip-sk { background: #EAF3F8;       color: var(--sky); }
-
-/* ICON BTN */
-.icon-btn { border: none; background: none; font-size: 15px; color: var(--hint); cursor: pointer; padding: 3px 5px; border-radius: 6px; }
-.icon-btn:active { background: var(--warm); }
-
+:root{--bg:#f0ede8;--sf:#fff;--sf2:#f7f5f2;--pr:#3d5a40;--pd:#2c4230;--ac:#8faa92;--acl:#c4d4c6;--wa:#c97b3a;--wal:#fdf0e3;--dg:#c0392b;--tx:#2a2a2a;--mu:#8a8a7a;--li:#b5b5a8;--bd:#e5e2dc;--tbh:56px;--sb:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;max-width:430px;margin:0 auto;overflow-x:hidden}
+.scr{display:none;min-height:calc(100vh - var(--tbh));padding-bottom:calc(var(--tbh) + var(--sb) + 16px)}
+.scr.on{display:block;animation:fi .2s ease}
+@keyframes fi{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.tbar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;height:calc(var(--tbh) + var(--sb));background:rgba(240,237,232,.96);backdrop-filter:blur(12px);border-top:1px solid var(--bd);display:flex;align-items:flex-start;padding-top:6px;padding-bottom:var(--sb);z-index:100}
+.ti{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:2px 0}
+.tii{font-size:22px;line-height:1}
+.til{font-size:10px;font-weight:500;color:var(--mu)}
+.ti.on .til{color:var(--pr);font-weight:600}
+.ti:active{opacity:.6}
+.ph{padding:56px 20px 20px}
+.ptl{font-family:'Noto Serif JP',serif;font-size:28px;font-weight:500}
+.psl{font-size:12px;color:var(--mu);margin-top:2px}
+.card{background:var(--sf);border-radius:16px;padding:18px;margin:0 16px 12px}
+.row{display:flex;align-items:center;justify-content:space-between;padding:0 16px;margin-bottom:10px}
+.rowt{font-size:17px;font-weight:600}
+.rowl{font-size:13px;color:var(--pr);cursor:pointer;font-weight:500}
+.bp{background:var(--pr);color:#fff;border:none;border-radius:14px;padding:16px;font-size:15px;font-weight:600;font-family:'Noto Sans JP',sans-serif;cursor:pointer;width:100%}
+.bp:active{background:var(--pd);transform:scale(.98)}
+.bs{background:var(--sf2);color:var(--mu);border:none;border-radius:14px;padding:16px;font-size:15px;font-weight:500;font-family:'Noto Sans JP',sans-serif;cursor:pointer}
+.bs:active{background:var(--bd)}
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:36px 20px;color:var(--mu);font-size:14px;text-align:center}
+input,textarea,select{width:100%;background:var(--bg);border:1.5px solid var(--bd);border-radius:12px;padding:13px 16px;font-size:15px;font-family:'Noto Sans JP',sans-serif;color:var(--tx);outline:none;-webkit-appearance:none;appearance:none}
+input:focus,textarea:focus,select:focus{border-color:var(--pr)}
+textarea{resize:none;min-height:90px;line-height:1.6}
+::placeholder{color:var(--li)}
+.lbl{display:block;font-size:13px;font-weight:500;color:var(--mu);margin-bottom:6px}
+.fg{margin-bottom:16px}
+.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.38);z-index:200;align-items:flex-end}
+.ov.on{display:flex;animation:oi .18s ease}
+@keyframes oi{from{opacity:0}to{opacity:1}}
+.sh{background:var(--bg);border-radius:24px 24px 0 0;padding:20px 20px calc(32px + var(--sb));width:100%;animation:shi .26s cubic-bezier(.25,.46,.45,.94);max-height:92vh;overflow-y:auto}
+@keyframes shi{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.hdl{width:36px;height:4px;background:var(--bd);border-radius:2px;margin:0 auto 20px}
+.mtt{font-family:'Noto Serif JP',serif;font-size:22px;font-weight:500;margin-bottom:20px}
+.brow{display:flex;gap:10px;margin-top:20px}
+.brow .bs,.brow .bp{flex:1}
+/* HOME */
+.hpos{position:relative}
+.htop{padding:56px 20px 0}
+.hlbl{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--mu);font-weight:500}
+.hdt{font-family:'Noto Serif JP',serif;font-size:30px;font-weight:500;margin-top:4px}
+.hq{position:absolute;top:56px;right:20px;width:36px;height:36px;background:var(--pr);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;font-size:16px;font-weight:600}
+.hq:active{background:var(--pd)}
+.cntd{margin:16px 16px 0;background:var(--pr);border-radius:20px;padding:24px;color:#fff;position:relative;overflow:hidden;cursor:pointer}
+.cntd::after{content:'';position:absolute;right:-20px;top:-20px;width:140px;height:140px;background:rgba(255,255,255,.07);border-radius:50%}
+.cntd::before{content:'';position:absolute;right:30px;bottom:-40px;width:120px;height:120px;background:rgba(255,255,255,.05);border-radius:50%}
+.cdl{font-size:12px;opacity:.75}
+.cdn{font-family:'Playfair Display',serif;font-size:48px;font-weight:400;line-height:1;margin:8px 0 4px}
+.cdc{font-size:13px;opacity:.7}
+.cdp{position:absolute;right:24px;bottom:24px;text-align:right;font-size:11px;opacity:.6}
+.cdpv{font-size:22px;font-weight:600;opacity:1}
+.sbar{height:6px;background:var(--bg);border-radius:3px;margin-top:12px;overflow:hidden}
+.sbf{height:100%;background:var(--pr);border-radius:3px;transition:width .7s}
+.spct{font-size:12px;color:var(--mu);float:right;margin-top:-20px;background:var(--sf);padding:2px 8px;border-radius:20px;border:1px solid var(--bd)}
+.ski{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--bd)}
+.ski:last-child{border-bottom:none}
+.skn{font-size:14px;font-weight:500}
+.skl{font-size:12px;color:var(--mu);margin-top:2px}
+.sks{color:var(--pr);font-size:13px}
+.di2{padding:12px 0;border-bottom:1px solid var(--bd)}
+.di2:last-child{border-bottom:none}
+.dil{font-size:11px;color:var(--mu);margin-bottom:4px}
+.dit{font-size:14px;line-height:1.6}
 /* SETTINGS */
-.settings-group { background: white; border-radius: 14px; margin: 0 16px 16px; border: 0.5px solid rgba(74,103,65,0.1); overflow: hidden; }
-.settings-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 0.5px solid rgba(74,103,65,0.1); cursor: pointer; }
-.settings-row:last-child { border-bottom: none; }
-.settings-section { font-size: 11px; color: var(--hint); font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; padding: 14px 16px 6px; }
-
-/* SAVINGS GRAPH */
-.sav-graph { height: 90px; display: flex; align-items: flex-end; gap: 5px; }
-.sav-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; height: 100%; justify-content: flex-end; }
-.sav-bar { width: 100%; background: var(--green-light); border-radius: 4px 4px 0 0; min-height: 4px; opacity: 0.65; }
-.sav-bar.cur { opacity: 1; background: var(--green-mid); }
-.sav-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 0.5px solid var(--warm); }
-.sav-row:last-child { border-bottom: none; }
-
-/* CIRCLE PROGRESS */
-.circle-wrap { position: relative; width: 90px; height: 90px; }
-.circle-wrap svg { transform: rotate(-90deg); }
-.circle-num { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-family: var(--mono); font-size: 16px; font-weight: 700; text-align: center; }
-.circle-num small { display: block; font-size: 10px; color: var(--hint); font-weight: 400; }
-
-/* TODO */
-.todo-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; border-bottom: 0.5px solid var(--warm); }
-.todo-item:last-child { border-bottom: none; }
-.todo-check { width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid var(--hint); cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; margin-top: 1px; }
-.todo-check.done { background: var(--green-light); border-color: var(--green-light); }
-.todo-check.done::after { content: '✓'; color: white; font-size: 11px; }
-
-/* LOG ENTRY */
-.log-entry { border-left: 2px solid var(--green-pale); padding: 0 0 16px 13px; margin-left: 16px; position: relative; }
-.log-entry::before { content: ''; position: absolute; left: -5px; top: 4px; width: 8px; height: 8px; border-radius: 50%; background: var(--green-light); }
-
-/* CALENDAR */
-.cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 2px; padding: 0 16px; }
-.cal-head-cell { text-align: center; font-size: 11px; color: var(--hint); padding: 4px 0; font-weight: 500; }
-.cal-day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 12px; border-radius: 8px; cursor: pointer; position: relative; font-family: var(--mono); }
-.cal-day.has { background: var(--cream); color: var(--sub); font-weight: 500; }
-.cal-day.today { background: var(--green-mid); color: white; font-weight: 700; }
-.cal-day.empty { opacity: 0; pointer-events: none; }
-.cal-dot { position: absolute; bottom: 3px; left: 50%; transform: translateX(-50%); width: 4px; height: 4px; border-radius: 50%; background: var(--amber); }
-
-/* STUDY */
-.sw-time { font-family: var(--mono); font-size: 52px; font-weight: 700; color: var(--green-dark); text-align: center; letter-spacing: 2px; margin: 10px 0; line-height: 1; }
-.sw-sub  { font-size: 12px; color: var(--hint); text-align: center; margin-bottom: 10px; }
-.lap-box { background: var(--cream); border-radius: 10px; padding: 8px 12px; margin-top: 8px; }
-.lap-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 0.5px solid var(--warm); font-size: 12px; }
-.lap-row:last-child { border-bottom: none; }
-.iv-set-row { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 0.5px solid var(--warm); }
-.iv-set-row:last-child { border-bottom: none; }
-.iv-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-.study-log-item { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 0.5px solid var(--warm); }
-.study-log-item:last-child { border-bottom: none; }
-
-/* AREA NOTES */
-.area-card { background: white; border-radius: 14px; border: 0.5px solid rgba(74,103,65,0.12); padding: 14px 16px; margin: 0 16px 10px; cursor: pointer; }
-.area-card:active { background: var(--cream); }
-.area-tag { display: inline-flex; align-items: center; padding: 2px 7px; border-radius: 12px; font-size: 10px; font-weight: 500; }
-.area-tag.general  { background: #EAF3F8; color: var(--sky); }
-.area-tag.farming  { background: #EAF6E4; color: var(--green-mid); }
-.area-tag.life     { background: #FDF3E3; color: var(--amber); }
-.area-tag.access   { background: #F3EFF9; color: #6B52A8; }
-.area-tag.cost     { background: #FFF0F0; color: var(--red); }
-
-/* MODAL */
-.modal-overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(28,43,26,0.5);
-  z-index: 200;
-  align-items: flex-end;
-}
-.modal-overlay.on { display: flex; }
-.modal-sheet {
-  background: var(--paper);
-  border-radius: 24px 24px 0 0;
-  width: 100%;
-  max-height: 90dvh;
-  max-height: 90vh;
-  overflow-y: auto;
-  padding: 12px 20px;
-  padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
-  animation: slide-up 0.27s cubic-bezier(0.4,0,0.2,1);
-}
-.modal-handle { width: 36px; height: 4px; background: var(--warm); border-radius: 2px; margin: 0 auto 14px; }
-.modal-title { font-family: var(--serif); font-size: 21px; color: var(--green-dark); margin-bottom: 14px; }
-@keyframes slide-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.setc{background:var(--sf);border-radius:16px;margin:0 16px;overflow:hidden}
+.setr{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--bd);cursor:pointer}
+.setr:last-child{border-bottom:none}
+.setr:active{background:var(--sf2)}
+.sett{font-size:15px;font-weight:500}
+.setd{font-size:12px;color:var(--mu);margin-top:2px}
+.setv{font-size:14px;color:var(--mu);display:flex;align-items:center;gap:4px}
+.chv{color:var(--li);font-size:14px}
+.tditm{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--bd)}
+.tditm:last-child{border-bottom:none}
+.tdck{width:22px;height:22px;border:2px solid var(--ac);border-radius:6px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.tdck.dn{background:var(--pr);border-color:var(--pr)}
+.tdck.dn::after{content:'\2713';color:#fff;font-size:12px;font-weight:700}
+.tdt{font-size:14px;flex:1}
+.tdt.dn{text-decoration:line-through;color:var(--mu)}
+.tddl{color:var(--li);font-size:18px;cursor:pointer;padding:0 4px}
+.tdinr{display:flex;gap:8px;margin-top:12px}
+.tdinr input{flex:1}
+.aic2{background:var(--sf);border-radius:16px;margin:0 16px;padding:18px;text-align:center}
+.ain{font-family:'Playfair Display',serif;font-size:20px;color:var(--pr)}
+/* SKILLS */
+.sfi{background:var(--sf);border-radius:16px;margin:0 16px 10px;padding:16px 18px}
+.sfh{display:flex;align-items:flex-start;justify-content:space-between}
+.sfn{font-size:16px;font-weight:600}
+.sfc{font-size:11px;color:var(--mu);margin-top:3px}
+.spb{height:5px;background:var(--bg);border-radius:3px;margin-top:12px;overflow:hidden}
+.spbf{height:100%;background:var(--pr);border-radius:3px}
+.smeta{display:flex;justify-content:space-between;margin-top:6px;font-size:11px;color:var(--mu)}
+.exbdg{display:inline-flex;align-items:center;gap:4px;background:var(--wal);color:var(--wa);border-radius:8px;padding:5px 10px;font-size:12px;font-weight:500;margin-top:10px}
+.exbdg.urg{background:#fff0f0;color:var(--dg)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.pulse{animation:pulse 1.5s infinite}
+.sstats{display:flex;gap:8px;margin-top:10px}
+.sstat{flex:1;background:var(--bg);border-radius:10px;padding:8px;text-align:center}
+.sstatv{font-size:15px;font-weight:600;color:var(--pr)}
+.sstatl{font-size:10px;color:var(--mu);margin-top:2px}
+.sact{display:flex;gap:8px;margin-top:12px}
+.sab{flex:1;background:var(--bg);border:1.5px solid var(--bd);border-radius:10px;padding:9px;font-size:12px;font-weight:500;font-family:'Noto Sans JP',sans-serif;cursor:pointer;color:var(--tx);text-align:center}
+.sab.hi{background:var(--acl);border-color:var(--ac);color:var(--pd)}
+.sab:active{opacity:.7}
+/* 学習履歴 */
+.shist{margin-top:14px;border-top:1px solid var(--bd);padding-top:12px}
+.shist-title{font-size:12px;font-weight:600;color:var(--mu);margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+.shist-count{font-size:11px;background:var(--acl);color:var(--pd);padding:2px 8px;border-radius:20px;font-weight:600}
+.shist-list{max-height:220px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.shist-item{padding:10px 0;border-bottom:1px solid var(--bd)}
+.shist-item:last-child{border-bottom:none}
+.shist-row{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.shist-left{flex:1;min-width:0}
+.shist-date{font-size:11px;color:var(--mu)}
+.shist-min{font-size:15px;font-weight:700;color:var(--pr);white-space:nowrap}
+.shist-detail{font-size:11px;color:var(--mu);margin-top:4px;line-height:1.6}
+.shist-memo{font-size:12px;color:var(--tx);margin-top:4px;line-height:1.5;word-break:break-all}
+/* CHIPS */
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{background:var(--sf2);border:1.5px solid var(--bd);border-radius:20px;padding:8px 14px;font-size:13px;cursor:pointer;font-family:'Noto Sans JP',sans-serif}
+.chip.on{background:var(--pr);border-color:var(--pr);color:#fff}
+.lvls{display:flex;gap:8px;flex-wrap:wrap}
+.lvl{background:var(--sf2);border:1.5px solid var(--bd);border-radius:10px;padding:8px 14px;font-size:13px;cursor:pointer;font-family:'Noto Sans JP',sans-serif}
+.lvl.on{background:var(--pr);border-color:var(--pr);color:#fff}
+/* SAVINGS */
+.scw2{display:flex;align-items:center;gap:20px}
+.csvg{width:80px;height:80px;flex-shrink:0}
+.sda{font-family:'Playfair Display',serif;font-size:32px}
+.hi2{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--bd)}
+.hi2:last-child{border-bottom:none}
+.hid{font-size:12px;color:var(--mu)}
+.hia{font-size:16px;font-weight:600;color:var(--pr)}
+.up{color:#4caf82}.dn2{color:#e07070}
+/* DIARY */
+.cg2{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;padding:0 16px;margin-bottom:8px}
+.cdh{text-align:center;font-size:12px;color:var(--mu);font-weight:500;padding:4px 0 8px}
+.cday{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:14px;border-radius:10px;cursor:pointer}
+.cday.tod{background:var(--pr);color:#fff;font-weight:600}
+.cday.dot{position:relative}
+.cday.dot::after{content:'';position:absolute;bottom:3px;width:4px;height:4px;background:var(--pr);border-radius:50%}
+.cday.tod.dot::after{background:#fff}
+.dfi2{background:var(--sf);border-radius:16px;margin:0 16px 10px;padding:16px 18px}
+.dfdt{font-size:12px;color:var(--mu);margin-bottom:6px}
+.dftt{font-size:14px;line-height:1.7;white-space:pre-wrap}
+.dtag{display:inline-block;background:var(--acl);color:var(--pd);font-size:11px;padding:3px 10px;border-radius:20px;margin-top:8px;font-weight:500}
+.mtag{display:inline-block;background:#e8f4ea;color:var(--pr);font-size:11px;padding:3px 10px;border-radius:20px;margin-top:8px;font-weight:500;margin-left:4px}
+.fab{position:fixed;bottom:calc(var(--tbh) + 12px + var(--sb));right:calc(50% - 215px + 16px);width:52px;height:52px;background:var(--pr);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:24px;cursor:pointer;box-shadow:0 4px 16px rgba(61,90,64,.4);z-index:90}
+.fab:active{transform:scale(.93)}
+/* AREA */
+.aitem{background:var(--sf);border-radius:16px;margin:0 16px 10px;padding:16px 18px}
+.aih{display:flex;justify-content:space-between;align-items:flex-start}
+.ain2{font-size:17px;font-weight:600}
+.aic3{font-size:11px;color:var(--mu);margin-top:3px}
+.aid{font-size:11px;color:var(--li)}
+.ast2{color:var(--pr);font-size:14px;margin-top:8px;letter-spacing:1px}
+.apv{font-size:13px;color:var(--mu);margin-top:6px;line-height:1.5}
+.abtn{background:var(--pr);color:#fff;border:none;border-radius:14px;padding:10px 18px;font-size:14px;font-weight:600;font-family:'Noto Sans JP',sans-serif;cursor:pointer;display:flex;align-items:center;gap:4px}
+.stars2{display:flex;gap:6px}
+.star{width:44px;height:44px;background:var(--sf2);border:none;border-radius:12px;font-size:18px;cursor:pointer}
+.star.on{background:var(--acl)}
+#schart{width:100%;height:120px;padding:8px 0}
+/* TIMER */
+.ttb2{display:flex;background:var(--bg);border-radius:14px;padding:4px;margin-bottom:20px}
+.tti2{flex:1;text-align:center;padding:10px;border-radius:10px;font-size:14px;font-weight:500;cursor:pointer;color:var(--mu);font-family:'Noto Sans JP',sans-serif}
+.tti2.on{background:var(--sf);color:var(--tx);font-weight:600;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.tdisp{text-align:center;font-family:'Playfair Display',serif;font-size:62px;font-weight:400;letter-spacing:4px;line-height:1;margin:8px 0 4px}
+.thint{text-align:center;font-size:12px;color:var(--mu);margin-bottom:16px}
+.tbrow{display:flex;gap:10px;margin-bottom:16px}
+.tbtn{flex:1;border:none;border-radius:14px;padding:14px;font-size:15px;font-weight:600;font-family:'Noto Sans JP',sans-serif;cursor:pointer}
+.tbtn.go{background:var(--pr);color:#fff}
+.tbtn.go:active{background:var(--pd);transform:scale(.97)}
+.tbtn.lap{background:var(--sf);color:var(--tx);border:1.5px solid var(--bd)}
+.tbtn.rst{background:#fdf0f0;color:var(--dg);border:1.5px solid #f0d0d0}
+.llist{max-height:110px;overflow-y:auto;margin-bottom:12px}
+.litem{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bd);font-size:13px}
+.litem:last-child{border-bottom:none}
+.lnum{color:var(--mu)}
+.ltm{font-weight:500;font-family:'Playfair Display',serif}
+.ivst{text-align:center;margin-bottom:12px}
+.ivbdg{display:inline-block;padding:5px 16px;border-radius:20px;font-size:13px;font-weight:600}
+.ivs{background:#e8f4ea;color:var(--pr)}
+.ivb{background:#fff3e0;color:var(--wa)}
+.ivd{background:#e8f4ea;color:var(--pr)}
+.ivig{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px}
+.ivig label{font-size:11px;margin-bottom:4px;display:block;color:var(--mu)}
+.ivig input{font-size:14px;padding:10px 12px;text-align:center}
+.swfb{display:flex;align-items:center;justify-content:center;background:var(--wal);border:1.5px solid #f0d8b8;border-radius:12px;padding:10px 14px;font-size:13px;font-weight:600;color:var(--wa);cursor:pointer;font-family:'Noto Sans JP',sans-serif;white-space:nowrap}
+.swfb:active{background:#fae4c8}
+.recs{border-top:1px solid var(--bd);padding-top:16px;margin-top:4px}
+.recst{font-size:15px;font-weight:700;margin-bottom:14px}
+.pgrow{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.eib2{background:var(--wal);border-radius:14px;padding:14px;margin-bottom:16px}
+.eit2{font-size:13px;font-weight:600;color:var(--wa);margin-bottom:12px}
+.mt8{margin-top:8px}
 </style>
 </head>
 <body>
-<div id="shell">
 
-<!-- ══════════════ SCREENS ══════════════ -->
-
-<!-- HOME -->
-<div id="scr-home" class="scr on">
-  <div class="ph-home">
-    <div style="display:flex;justify-content:space-between;align-items:center;">
-      <div>
-        <div style="font-size:10px;color:var(--hint);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:2px;">Life Shift Log</div>
-        <div style="font-family:var(--serif);font-size:22px;color:var(--green-dark);" id="home-date"></div>
-      </div>
-      <div id="home-avatar" onclick="switchTab('settings')" style="width:36px;height:36px;border-radius:50%;background:var(--green-dark);color:white;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;"></div>
-    </div>
+<!-- ホーム画面 -->
+<div id="s-home" class="scr on">
+  <div class="hpos">
+    <div class="htop"><div class="hlbl">LIFE SHIFT LOG</div><div class="hdt" id="h-date"></div></div>
+    <div class="hq" onclick="showSettings()">?</div>
   </div>
-  <div class="countdown-card">
-    <div class="cd-label">移住まで</div>
-    <div style="display:flex;align-items:flex-end;justify-content:space-between;">
-      <div>
-        <div class="cd-days" id="cd-num">—<span>日</span></div>
-        <div class="cd-target" id="cd-target"><b>未設定</b></div>
-      </div>
-      <div style="text-align:right;">
-        <div style="font-size:10px;color:rgba(255,255,255,0.3);margin-bottom:3px;">達成率</div>
-        <div style="font-family:var(--mono);font-size:24px;color:var(--green-pale);" id="home-pct">0%</div>
-      </div>
-    </div>
+  <div class="cntd" onclick="showSettings()">
+    <div class="cdl">移住まで</div>
+    <div class="cdn" id="h-cnt">&#8212;</div>
+    <div class="cdc" id="h-loc">未設定</div>
+    <div class="cdp">達成率<br><span class="cdpv" id="h-pct">0%</span></div>
   </div>
-  <div class="section-row" style="margin-top:2px;">
-    <div class="section-title">貯金状況</div>
-    <div class="section-link" onclick="switchTab('savings')">詳細 →</div>
-  </div>
-  <div class="card" style="padding:13px 16px;">
-    <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:8px;">
-      <div>
-        <div class="card-label">現在の貯金</div>
-        <div style="font-family:var(--mono);font-size:20px;font-weight:700;color:var(--green-dark);" id="home-sav">¥0</div>
-      </div>
-      <span class="chip chip-g" id="home-sav-pct">0%</span>
-    </div>
-    <div class="gauge-track"><div class="gauge-fill" id="home-gauge" style="width:0%"></div></div>
-  </div>
-  <div id="norma-sec"></div>
-  <div class="section-row">
-    <div class="section-title">スキル進捗</div>
-    <div class="section-link" onclick="switchTab('skills')">すべて →</div>
-  </div>
-  <div class="card" id="home-skills"></div>
-  <div class="section-row">
-    <div class="section-title">最近の記録</div>
-    <div class="section-link" onclick="switchTab('diary')">日記へ →</div>
-  </div>
-  <div class="card" id="home-diary"></div>
-  <div style="height:16px;"></div>
-</div>
-
-<!-- SKILLS -->
-<div id="scr-skills" class="scr">
-  <div class="ph"><div class="page-title">スキル管理</div><div class="page-sub">資格 & 農業スキル</div></div>
-  <div id="skills-list"></div>
-  <div style="padding:0 16px 4px;"><button class="btn btn-p btn-full" onclick="openAddSkill()">＋ スキルを追加</button></div>
-  <div style="height:16px;"></div>
-</div>
-
-<!-- SAVINGS -->
-<div id="scr-savings" class="scr">
-  <div class="ph"><div class="page-title">資産管理</div><div class="page-sub">シンプル・セービング</div></div>
+  <div style="height:20px"></div>
+  <div class="row"><span class="rowt">貯金状況</span><span class="rowl" onclick="go('savings')">詳細 &#8594;</span></div>
   <div class="card">
-    <div class="card-label">目標達成率</div>
-    <div style="display:flex;align-items:center;gap:18px;">
-      <div class="circle-wrap">
-        <svg width="90" height="90" viewBox="0 0 90 90">
-          <circle cx="45" cy="45" r="36" fill="none" stroke="var(--warm)" stroke-width="7"/>
-          <circle cx="45" cy="45" r="36" fill="none" stroke="var(--green-mid)" stroke-width="7"
-            stroke-dasharray="226.19" id="sav-circle" stroke-dashoffset="226.19" stroke-linecap="round"/>
-        </svg>
-        <div class="circle-num"><span id="sav-pct-n">0</span>%<small>達成</small></div>
-      </div>
-      <div>
-        <div style="font-family:var(--mono);font-size:24px;font-weight:700;color:var(--green-dark);" id="sav-cur">¥0</div>
-        <div style="font-size:12px;color:var(--hint);margin-top:2px;">目標: <span id="sav-tgt-d">—</span></div>
-        <div style="font-size:12px;color:var(--sub);margin-top:4px;" id="sav-rem">設定から目標を入力してください</div>
-      </div>
-    </div>
+    <div style="font-size:12px;color:var(--mu);margin-bottom:6px">現在の貯金</div>
+    <div style="font-family:'Playfair Display',serif;font-size:26px" id="h-sav">&#165;0</div>
+    <div class="spct" id="h-spct">0%</div>
+    <div class="sbar" style="clear:both"><div class="sbf" id="h-sbar" style="width:0%"></div></div>
   </div>
-  <div class="card"><div class="card-label">推移グラフ</div><div class="sav-graph" id="sav-graph"></div></div>
+  <div class="row"><span class="rowt">スキル進捗</span><span class="rowl" onclick="go('skills')">すべて &#8594;</span></div>
+  <div class="card" id="h-skcard"><div class="empty"><span>スキルを追加してみましょう</span></div></div>
+  <div class="row"><span class="rowt">最近の記録</span><span class="rowl" onclick="go('diary')">日誌へ &#8594;</span></div>
+  <div class="card" id="h-drcard"><div class="empty"><span>まだ記録がありません</span></div></div>
+</div>
+
+<!-- スキル画面 -->
+<div id="s-skills" class="scr">
+  <div class="ph"><div class="ptl">スキル管理</div><div class="psl">資格 &amp; 経験・スキル</div></div>
+  <div id="skilllist"><div class="card"><div class="empty"><span>スキルがありません</span></div></div></div>
+  <div style="padding:0 16px"><button class="bp" onclick="openMod('m-skill')">＋ スキルを追加</button></div>
+</div>
+
+<!-- 貯金画面 -->
+<div id="s-savings" class="scr">
+  <div class="ph"><div class="ptl">資産管理</div><div class="psl">シンプル・セービング</div></div>
   <div class="card">
-    <div class="card-label">貯金を更新</div>
-    <div style="display:flex;gap:8px;margin-top:8px;">
-      <input type="number" class="form-input" id="sav-input" placeholder="現在の貯金額（円）" style="flex:1;font-family:var(--mono);font-size:16px;">
-      <button class="btn btn-p" onclick="saveSavings()">記録</button>
-    </div>
-  </div>
-  <div class="card"><div class="card-label">記録履歴</div><div id="sav-hist"></div></div>
-  <div style="height:16px;"></div>
-</div>
-
-<!-- DIARY -->
-<div id="scr-diary" class="scr">
-  <div class="ph"><div class="page-title">日誌</div><div class="page-sub" id="diary-month"></div></div>
-  <div style="margin-bottom:12px;">
-    <div class="cal-grid" id="cal-head"></div>
-    <div class="cal-grid" id="cal-body"></div>
-  </div>
-  <div style="padding:0 16px 8px;font-size:13px;color:var(--hint);font-weight:500;">最近の記録</div>
-  <div id="diary-list"></div>
-  <div style="height:16px;"></div>
-</div>
-
-<!-- AREAS -->
-<div id="scr-areas" class="scr">
-  <div class="ph">
-    <div style="display:flex;align-items:center;justify-content:space-between;">
-      <div><div class="page-title">エリアノート</div><div class="page-sub">訪問地の記録 & 農業メモ</div></div>
-      <button class="btn btn-p" onclick="openNewArea()" style="padding:8px 14px;font-size:13px;">＋ 追加</button>
-    </div>
-  </div>
-  <div id="area-list"></div>
-  <div style="height:16px;"></div>
-</div>
-
-<!-- SETTINGS -->
-<div id="scr-settings" class="scr">
-  <div class="ph"><div class="page-title">設定</div><div class="page-sub">プロフィール & 目標</div></div>
-  <div class="settings-section">プロフィール</div>
-  <div class="settings-group">
-    <div class="settings-row" onclick="openSetEdit('name')">
-      <div><div style="font-size:14px;font-weight:500;">名前</div><div style="font-size:11px;color:var(--hint);margin-top:1px;">ホームに表示されます</div></div>
-      <div style="display:flex;align-items:center;gap:6px;"><span style="font-size:13px;color:var(--hint);font-family:var(--mono);" id="set-name">未設定</span><span style="color:var(--hint);">›</span></div>
-    </div>
-  </div>
-  <div class="settings-section">移住目標</div>
-  <div class="settings-group">
-    <div class="settings-row" onclick="openSetEdit('target_date')">
-      <div><div style="font-size:14px;font-weight:500;">移住予定日</div><div style="font-size:11px;color:var(--hint);margin-top:1px;">カウントダウンに使用</div></div>
-      <div style="display:flex;align-items:center;gap:6px;"><span style="font-size:13px;color:var(--hint);font-family:var(--mono);" id="set-date">未設定</span><span style="color:var(--hint);">›</span></div>
-    </div>
-    <div class="settings-row" onclick="openSetEdit('target_place')">
-      <div><div style="font-size:14px;font-weight:500;">移住先候補（最有力）</div><div style="font-size:11px;color:var(--hint);margin-top:1px;">カウントダウンに表示</div></div>
-      <div style="display:flex;align-items:center;gap:6px;"><span style="font-size:13px;color:var(--hint);font-family:var(--mono);" id="set-place">未設定</span><span style="color:var(--hint);">›</span></div>
-    </div>
-    <div class="settings-row" onclick="openSetEdit('target_savings')">
-      <div><div style="font-size:14px;font-weight:500;">目標貯金額</div><div style="font-size:11px;color:var(--hint);margin-top:1px;">資産管理の目標値</div></div>
-      <div style="display:flex;align-items:center;gap:6px;"><span style="font-size:13px;color:var(--hint);font-family:var(--mono);" id="set-sav">未設定</span><span style="color:var(--hint);">›</span></div>
-    </div>
-  </div>
-  <div class="settings-section">ToDoリスト</div>
-  <div class="settings-group">
-    <div id="todo-list" style="padding:4px 16px 8px;"></div>
-    <div style="padding:0 16px 12px;">
-      <div style="display:flex;gap:8px;margin-top:8px;">
-        <input type="text" class="form-input" id="todo-new" placeholder="新しいタスクを追加..." style="flex:1;">
-        <button class="btn btn-p" onclick="addTodo()" style="padding:10px 14px;white-space:nowrap;">追加</button>
+    <div style="font-size:13px;color:var(--mu);margin-bottom:14px">目標達成率</div>
+    <div class="scw2">
+      <svg class="csvg" viewBox="0 0 80 80">
+        <circle cx="40" cy="40" r="32" fill="none" stroke="#e5e2dc" stroke-width="6"/>
+        <circle id="sv-circ" cx="40" cy="40" r="32" fill="none" stroke="#3d5a40" stroke-width="6" stroke-dasharray="201" stroke-dashoffset="201" stroke-linecap="round" transform="rotate(-90 40 40)" style="transition:stroke-dashoffset .8s"/>
+        <text x="40" y="38" text-anchor="middle" font-size="12" fill="#3d5a40" font-weight="600" font-family="Noto Sans JP"><tspan id="sv-pct">0%</tspan></text>
+        <text x="40" y="52" text-anchor="middle" font-size="9" fill="#8a8a7a" font-family="Noto Sans JP">達成</text>
+      </svg>
+      <div>
+        <div class="sda" id="sv-amt">&#165;0</div>
+        <div style="font-size:13px;color:var(--mu);margin-top:4px">目標: <span id="sv-tgt">未設定</span></div>
+        <div style="font-size:12px;color:var(--pr)" id="sv-hint">設定から目標を入力してください</div>
       </div>
     </div>
   </div>
-  <div class="settings-section">アプリ情報</div>
-  <div class="settings-group">
-    <div class="settings-row" style="cursor:default;">
-      <div><div style="font-size:14px;font-weight:500;">Life Shift Log</div><div style="font-size:11px;color:var(--hint);margin-top:1px;">データはこの端末に保存されます</div></div>
-      <span style="font-size:13px;color:var(--hint);font-family:var(--mono);">v2.1</span>
+  <div class="card">
+    <div style="font-size:13px;color:var(--mu);margin-bottom:12px">推移グラフ</div>
+    <canvas id="schart"></canvas>
+    <div id="schart-empty" class="empty" style="padding:20px;display:none"><span>まだ記録がありません</span></div>
+  </div>
+  <div class="card">
+    <div style="font-size:13px;color:var(--mu);margin-bottom:12px">貯金を更新</div>
+    <div style="display:flex;gap:8px">
+      <input type="number" id="sv-inp" placeholder="現在の貯金額（円）" style="flex:1">
+      <button onclick="recSavings()" style="background:var(--pr);color:#fff;border:none;border-radius:12px;padding:0 18px;font-size:14px;font-weight:600;font-family:'Noto Sans JP',sans-serif;cursor:pointer;white-space:nowrap">記録</button>
     </div>
   </div>
-  <div style="height:16px;"></div>
-</div>
-
-<!-- ══════════════ TAB BAR ══════════════ -->
-<div id="tabbar">
-  <div class="tab on" onclick="switchTab('home')"    id="nav-home">   <span class="tab-ic">🏡</span><span class="tab-lb">ホーム</span></div>
-  <div class="tab"    onclick="switchTab('skills')"  id="nav-skills">  <span class="tab-ic">📚</span><span class="tab-lb">スキル</span></div>
-  <div class="tab"    onclick="switchTab('savings')" id="nav-savings"> <span class="tab-ic">🌱</span><span class="tab-lb">貯金</span></div>
-  <div class="tab"    onclick="switchTab('diary')"   id="nav-diary">   <span class="tab-ic">📖</span><span class="tab-lb">日誌</span></div>
-  <div class="tab"    onclick="switchTab('areas')"   id="nav-areas">   <span class="tab-ic">🗺️</span><span class="tab-lb">エリア</span></div>
-</div>
-
-<!-- FAB (日誌タブのみ) -->
-<div class="fab" id="diary-fab" style="display:none;" onclick="openNewDiary()">＋</div>
-
-</div><!-- #shell -->
-
-<!-- ══════════════ MODALS ══════════════ -->
-
-<!-- Add/Edit Skill -->
-<div class="modal-overlay" id="m-skill" onclick="mOut(event,'m-skill')">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div class="modal-title" id="m-skill-title">スキルを追加</div>
-    <div class="form-group"><label class="form-label">スキル名</label><input type="text" class="form-input" id="sk-name" placeholder="例：農業技術検定2級"></div>
-    <div class="form-group"><label class="form-label">種別</label>
-      <div style="display:flex;gap:8px;">
-        <button class="btn btn-p" id="sk-btn-exam" onclick="setSkillType(true)" style="flex:1;">📋 資格試験</button>
-        <button class="btn btn-g" id="sk-btn-skill" onclick="setSkillType(false)" style="flex:1;">🌿 スキル</button>
-      </div>
-    </div>
-    <div id="sk-exam-f">
-      <div class="form-group"><label class="form-label">試験日</label><input type="date" class="form-input" id="sk-exam-date"></div>
-      <div class="form-group"><label class="form-label">目標勉強時間（時間）</label><input type="number" class="form-input" id="sk-target-h" placeholder="例：150"></div>
-    </div>
-    <div id="sk-skill-f" style="display:none;">
-      <div class="form-group"><label class="form-label">目標時間（時間）</label><input type="number" class="form-input" id="sk-skill-h" placeholder="例：200"></div>
-    </div>
-    <div style="display:flex;gap:8px;margin-top:4px;">
-      <button class="btn btn-g btn-full" onclick="closeM('m-skill')">キャンセル</button>
-      <button class="btn btn-p btn-full" id="sk-save-btn" onclick="saveSkill()">追加</button>
-    </div>
+  <div class="card">
+    <div style="font-size:13px;color:var(--mu);margin-bottom:10px">記録履歴</div>
+    <div id="sv-hist"><div style="color:var(--mu);font-size:14px">記録がありません</div></div>
   </div>
 </div>
 
-<!-- Study Session -->
-<div class="modal-overlay" id="m-study" onclick="mOut(event,'m-study')">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div class="modal-title" id="m-study-title">学習セッション</div>
-    <div style="display:flex;gap:4px;background:var(--warm);border-radius:10px;padding:3px;margin-bottom:14px;">
-      <button class="btn" id="tab-sw-btn" onclick="setStudyTab('sw')" style="flex:1;padding:7px;border-radius:8px;font-size:13px;background:white;color:var(--green-mid);font-weight:700;">⏱ ストップウォッチ</button>
-      <button class="btn" id="tab-iv-btn" onclick="setStudyTab('iv')" style="flex:1;padding:7px;border-radius:8px;font-size:13px;background:none;color:var(--hint);">⏲ インターバル</button>
-    </div>
-    <div id="tab-sw">
-      <div class="sw-time" id="sw-time">00:00:00</div>
-      <div class="sw-sub" id="sw-status">タップして開始</div>
-      <div style="display:flex;gap:8px;justify-content:center;margin-bottom:10px;">
-        <button class="btn btn-p" id="sw-start-btn" onclick="swToggle()" style="min-width:76px;">開始</button>
-        <button class="btn btn-g" onclick="swLap()" style="min-width:76px;">ラップ</button>
-        <button class="btn btn-d" onclick="swReset()" style="min-width:60px;">リセット</button>
+<!-- 日誌画面 -->
+<div id="s-diary" class="scr">
+  <div class="ph"><div class="ptl">日誌</div><div class="psl" id="d-month"></div></div>
+  <div class="cg2" id="d-calh"></div>
+  <div class="cg2" id="d-cal"></div>
+  <div style="height:16px"></div>
+  <div class="row"><span class="rowt">最近の記録</span></div>
+  <div id="diarylist"><div class="card"><div class="empty"><span>まだ日誌がありません</span></div></div></div>
+  <div class="fab" onclick="openMod('m-diary')">＋</div>
+</div>
+
+<!-- エリア画面 -->
+<div id="s-area" class="scr">
+  <div class="ph" style="display:flex;align-items:flex-start;justify-content:space-between">
+    <div><div class="ptl">エリアノート</div><div class="psl">訪問地の記録 &amp; 移住先検討メモ</div></div>
+    <button class="abtn" style="margin-top:48px" onclick="openMod('m-area')">＋ 追加</button>
+  </div>
+  <div id="arealist"><div class="card"><div class="empty"><span>エリアノートがありません</span><span style="font-size:13px">訪問地や候補地の情報を記録しましょう</span></div></div></div>
+</div>
+
+<!-- タブバー -->
+<nav class="tbar">
+  <div class="ti on" id="tb-home" onclick="go('home')"><span class="tii">&#127969;</span><span class="til">ホーム</span></div>
+  <div class="ti" id="tb-skills" onclick="go('skills')"><span class="tii">&#128218;</span><span class="til">スキル</span></div>
+  <div class="ti" id="tb-savings" onclick="go('savings')"><span class="tii">&#127807;</span><span class="til">貯金</span></div>
+  <div class="ti" id="tb-diary" onclick="go('diary')"><span class="tii">&#128214;</span><span class="til">日誌</span></div>
+  <div class="ti" id="tb-area" onclick="go('area')"><span class="tii">&#128506;&#65039;</span><span class="til">エリア</span></div>
+</nav>
+
+<!-- 設定モーダル -->
+<div class="ov" id="m-settings">
+  <div class="sh">
+    <div class="hdl"></div>
+    <div class="mtt">設定</div>
+    <div style="font-size:11px;color:var(--mu);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;font-weight:500">プロフィール</div>
+    <div class="setc">
+      <div class="setr" onclick="openPrompt('name','名前','ホームに表示されます','text')">
+        <div><div class="sett">名前</div><div class="setd">ホームに表示されます</div></div>
+        <div class="setv"><span id="sv-name">未設定</span><span class="chv">&#8250;</span></div>
       </div>
-      <div id="sw-laps" class="lap-box" style="display:none;"></div>
     </div>
-    <div id="tab-iv" style="display:none;">
-      <div id="iv-config">
-        <div class="form-group"><label class="form-label">勉強時間（分）</label><input type="number" class="form-input" id="iv-study-min" value="25" min="1"></div>
-        <div class="form-group"><label class="form-label">休憩時間（分）</label><input type="number" class="form-input" id="iv-rest-min" value="5" min="1"></div>
-        <div class="form-group"><label class="form-label">セット数</label><input type="number" class="form-input" id="iv-sets" value="4" min="1" max="20"></div>
-        <button class="btn btn-p btn-full" onclick="ivStart()">インターバル開始</button>
+    <div style="font-size:11px;color:var(--mu);text-transform:uppercase;letter-spacing:.5px;margin:16px 0 8px;font-weight:500">移住目標</div>
+    <div class="setc">
+      <div class="setr" onclick="openPrompt('moveDate','移住予定日','','date')">
+        <div><div class="sett">移住予定日</div><div class="setd">カウントダウンに使用</div></div>
+        <div class="setv"><span id="sv-date">未設定</span><span class="chv">&#8250;</span></div>
       </div>
-      <div id="iv-running" style="display:none;">
-        <div class="sw-time" id="iv-time">25:00</div>
-        <div class="sw-sub" id="iv-phase-label">準備完了</div>
-        <div style="display:flex;gap:8px;justify-content:center;margin-bottom:10px;">
-          <button class="btn btn-p" id="iv-toggle-btn" onclick="ivToggle()" style="min-width:76px;">開始</button>
-          <button class="btn btn-d" onclick="ivStop()" style="min-width:76px;">終了</button>
+      <div class="setr" onclick="openPrompt('moveLoc','移住先候補','候補地名を入力','text')">
+        <div><div class="sett">移住先候補（最有力）</div><div class="setd">カウントダウンに表示</div></div>
+        <div class="setv"><span id="sv-loc">未設定</span><span class="chv">&#8250;</span></div>
+      </div>
+      <div class="setr" onclick="openPrompt('savTgt','目標貯金額','円で入力（例：3000000）','number')">
+        <div><div class="sett">目標貯金額</div><div class="setd">資産管理の目標値</div></div>
+        <div class="setv"><span id="sv-tgts">未設定</span><span class="chv">&#8250;</span></div>
+      </div>
+    </div>
+    <div style="font-size:11px;color:var(--mu);text-transform:uppercase;letter-spacing:.5px;margin:16px 0 8px;font-weight:500">TODOリスト</div>
+    <div class="setc" style="padding:14px 18px">
+      <div id="tdlist"></div>
+      <div class="tdinr">
+        <input type="text" id="td-inp" placeholder="新しいタスクを追加...">
+        <button onclick="addTodo()" style="background:var(--pr);color:#fff;border:none;border-radius:12px;padding:0 16px;font-size:14px;font-weight:600;font-family:'Noto Sans JP',sans-serif;cursor:pointer;white-space:nowrap">追加</button>
+      </div>
+    </div>
+    <div style="font-size:11px;color:var(--mu);text-transform:uppercase;letter-spacing:.5px;margin:16px 0 8px;font-weight:500">アプリ情報</div>
+    <div class="aic2"><div class="ain">Life Shift Log</div><div style="font-size:12px;color:var(--mu);margin-top:4px">Version 2.0</div></div>
+    <div class="brow"><button class="bs" onclick="closeMod('m-settings')">閉じる</button></div>
+  </div>
+</div>
+
+<!-- スキル追加モーダル -->
+<div class="ov" id="m-skill">
+  <div class="sh">
+    <div class="hdl"></div>
+    <div class="mtt">スキルを追加</div>
+    <div class="fg"><label class="lbl">スキル名</label><input type="text" id="sk-name" placeholder="例：宅建士、溶接技能士、農業基礎知識"></div>
+    <div class="fg">
+      <label class="lbl">カテゴリ</label>
+      <div class="chips" id="sk-cats">
+        <div class="chip on" onclick="pickCat(0)">&#128203; 資格</div>
+        <div class="chip" onclick="pickCat(1)">&#127806; 農業</div>
+        <div class="chip" onclick="pickCat(2)">&#128295; 技術</div>
+        <div class="chip" onclick="pickCat(3)">&#127760; 語学</div>
+        <div class="chip" onclick="pickCat(4)">&#128188; ビジネス</div>
+        <div class="chip" onclick="pickCat(5)">&#10024; その他</div>
+      </div>
+    </div>
+    <div class="fg">
+      <label class="lbl">習熟度</label>
+      <div class="lvls" id="sk-lvls">
+        <div class="lvl on" onclick="pickLv(this,0)">未着手</div>
+        <div class="lvl" onclick="pickLv(this,25)">学習中</div>
+        <div class="lvl" onclick="pickLv(this,50)">中級</div>
+        <div class="lvl" onclick="pickLv(this,75)">上級</div>
+        <div class="lvl" onclick="pickLv(this,100)">習得済み</div>
+      </div>
+    </div>
+    <div class="eib2">
+      <div class="eit2">&#128203; 試験・資格情報（任意）</div>
+      <div class="fg" style="margin-bottom:12px"><label class="lbl">試験日</label><input type="date" id="sk-exam"></div>
+      <div class="fg" style="margin-bottom:0"><label class="lbl">目標学習時間（合計・時間）</label><input type="number" id="sk-thrs" placeholder="例：100"></div>
+    </div>
+    <div class="fg"><label class="lbl">参考書・教材（任意、読点「、」区切り）</label><input type="text" id="sk-books" placeholder="例：らくらく宅建塾、過去問集"></div>
+    <div class="fg"><label class="lbl">メモ（任意）</label><textarea id="sk-memo" placeholder="目標、学習方針など…" style="min-height:60px"></textarea></div>
+    <div class="brow"><button class="bs" onclick="closeMod('m-skill')">キャンセル</button><button class="bp" onclick="addSkill()">追加する</button></div>
+  </div>
+</div>
+
+<!-- 学習セッションモーダル -->
+<div class="ov" id="m-study">
+  <div class="sh">
+    <div class="hdl"></div>
+    <div style="font-size:12px;color:var(--mu);margin-bottom:4px">学習セッション</div>
+    <div class="mtt" id="st-sknm"></div>
+    <div class="ttb2">
+      <div class="tti2 on" id="sw-tab" onclick="swTab()">&#9201; ストップウォッチ</div>
+      <div class="tti2" id="iv-tab" onclick="ivTab()">&#9200; インターバル</div>
+    </div>
+    <!-- ストップウォッチ -->
+    <div id="sw-pnl">
+      <div class="tdisp" id="sw-disp">00:00:00</div>
+      <div class="thint" id="sw-hint">タップして開始</div>
+      <div class="tbrow">
+        <button class="tbtn go" id="sw-gbtn" onclick="swToggle()">開始</button>
+        <button class="tbtn lap" onclick="swLap()">ラップ</button>
+        <button class="tbtn rst" onclick="swReset()">リセット</button>
+      </div>
+      <div class="llist" id="laplist"></div>
+    </div>
+    <!-- インターバル -->
+    <div id="iv-pnl" style="display:none">
+      <div class="ivst"><div class="ivbdg ivs" id="iv-bdg">学習時間</div><div style="font-size:12px;color:var(--mu);margin-top:4px" id="iv-info">設定してスタート</div></div>
+      <div class="tdisp" id="iv-disp">00:00</div>
+      <div class="thint" style="margin-bottom:14px">インターバルタイマー</div>
+      <div class="ivig" id="iv-inps">
+        <div><label>学習時間（分）</label><input type="number" id="iv-wk" value="25" min="1"></div>
+        <div><label>休憩時間（分）</label><input type="number" id="iv-bk" value="5" min="1"></div>
+        <div><label>セット数</label><input type="number" id="iv-st" value="4" min="1"></div>
+      </div>
+      <button class="bp" id="iv-gbtn" onclick="ivToggle()">インターバル開始</button>
+      <button class="bs mt8" id="iv-rbtn" onclick="ivReset()" style="width:100%;display:none">リセット</button>
+    </div>
+    <!-- 学習記録フォーム -->
+    <div class="recs">
+      <div class="recst">学習を記録する</div>
+      <div class="fg"><label class="lbl">学習時間（分）</label><div style="display:flex;gap:8px"><input type="number" id="rec-min" placeholder="例：45" style="flex:1"><button class="swfb" onclick="fillSW()">SWから入力</button></div></div>
+      <div class="fg"><label class="lbl">ページ記録</label>
+        <div class="pgrow">
+          <div><label class="lbl" style="font-size:11px">開始ページ</label><input type="number" id="rec-pf" placeholder="例：42"></div>
+          <div><label class="lbl" style="font-size:11px">終了ページ</label><input type="number" id="rec-pt" placeholder="例：58"></div>
         </div>
-        <div id="iv-sets-disp" class="lap-box"></div>
+      </div>
+      <div class="fg"><label class="lbl">使用した参考書</label><select id="rec-book"><option value="">選択なし</option></select></div>
+      <div class="fg"><label class="lbl">メモ（任意）</label><textarea id="rec-memo" placeholder="今日学んだこと…" style="min-height:70px"></textarea></div>
+      <div class="brow"><button class="bs" onclick="closeStudy()">閉じる</button><button class="bp" onclick="recStudy()">記録する</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- 日誌追加モーダル -->
+<div class="ov" id="m-diary">
+  <div class="sh">
+    <div class="hdl"></div>
+    <div class="mtt">今日の記録</div>
+    <div class="fg"><label class="lbl">日付</label><input type="date" id="dr-date"></div>
+    <div class="fg"><label class="lbl">日誌</label><textarea id="dr-txt" placeholder="今日の進捗、気持ち、気づき…"></textarea></div>
+    <div class="fg"><label class="lbl">関連スキル（任意）</label><select id="dr-sk"><option value="">なし</option></select></div>
+    <div class="brow"><button class="bs" onclick="closeMod('m-diary')">キャンセル</button><button class="bp" onclick="addDiary()">保存する</button></div>
+  </div>
+</div>
+
+<!-- エリア追加モーダル -->
+<div class="ov" id="m-area">
+  <div class="sh">
+    <div class="hdl"></div>
+    <div class="mtt">エリアを追加</div>
+    <div class="fg"><label class="lbl">エリア名・地名</label><input type="text" id="ar-name" placeholder="例：長野県安曇野市"></div>
+    <div class="fg"><label class="lbl">訪問日（任意）</label><input type="date" id="ar-date"></div>
+    <div class="fg">
+      <label class="lbl">カテゴリ</label>
+      <div class="chips" id="ar-cats">
+        <div class="chip on" onclick="pickAcat(0)">&#128506;&#65039; 総合メモ</div>
+        <div class="chip" onclick="pickAcat(1)">&#127806; 農業適性</div>
+        <div class="chip" onclick="pickAcat(2)">&#127976;&#65039; 生活環境</div>
+        <div class="chip" onclick="pickAcat(3)">&#127780;&#65039; 気候</div>
+        <div class="chip" onclick="pickAcat(4)">&#128176; 就農支援</div>
+        <div class="chip" onclick="pickAcat(5)">&#128663; 交通</div>
       </div>
     </div>
-    <hr style="border:none;border-top:0.5px solid var(--warm);margin:12px 0;">
-    <div style="font-size:13px;font-weight:700;color:var(--green-dark);margin-bottom:10px;">学習を記録する</div>
-    <div class="form-group"><label class="form-label">学習時間（分）</label>
-      <div style="display:flex;gap:8px;">
-        <input type="number" class="form-input" id="log-min" placeholder="例：45" style="flex:1;">
-        <button class="btn btn-am" onclick="fillFromSW()" style="white-space:nowrap;padding:10px 12px;font-size:12px;">SWから入力</button>
+    <div class="fg"><label class="lbl">内容</label><textarea id="ar-cont" placeholder="気候、農地の状況、就農支援制度、生活環境など…"></textarea></div>
+    <div class="fg">
+      <label class="lbl">評価（任意）</label>
+      <div class="stars2" id="ar-stars">
+        <button class="star" onclick="pickStar(1)">&#9733;</button>
+        <button class="star" onclick="pickStar(2)">&#9733;</button>
+        <button class="star" onclick="pickStar(3)">&#9733;</button>
+        <button class="star" onclick="pickStar(4)">&#9733;</button>
+        <button class="star" onclick="pickStar(5)">&#9733;</button>
       </div>
     </div>
-    <div class="form-group"><label class="form-label">ページ記録</label>
-      <div style="display:flex;gap:8px;">
-        <div style="flex:1;"><label class="form-label" style="font-size:11px;">開始ページ</label><input type="number" class="form-input" id="log-page-from" placeholder="例：42"></div>
-        <div style="flex:1;"><label class="form-label" style="font-size:11px;">終了ページ</label><input type="number" class="form-input" id="log-page-to" placeholder="例：58"></div>
-      </div>
-    </div>
-    <div class="form-group"><label class="form-label">使用した参考書</label><select class="form-input" id="log-book-sel"></select></div>
-    <div class="form-group"><label class="form-label">メモ（任意）</label><input type="text" class="form-input" id="log-memo" placeholder="今日学んだこと..."></div>
-    <div style="display:flex;gap:8px;">
-      <button class="btn btn-g btn-full" onclick="closeM('m-study')">閉じる</button>
-      <button class="btn btn-p btn-full" onclick="logStudy()">記録する</button>
-    </div>
-    <div id="study-hist" style="margin-top:14px;"></div>
+    <div class="brow"><button class="bs" onclick="closeMod('m-area')">キャンセル</button><button class="bp" onclick="addArea()">追加</button></div>
   </div>
 </div>
 
-<!-- Edit Study Log -->
-<div class="modal-overlay" id="m-edit-log" onclick="mOut(event,'m-edit-log')">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div class="modal-title">学習記録を編集</div>
-    <div class="form-group"><label class="form-label">学習時間（分）</label><input type="number" class="form-input" id="el-min"></div>
-    <div class="form-group"><label class="form-label">ページ記録</label>
-      <div style="display:flex;gap:8px;">
-        <div style="flex:1;"><label class="form-label" style="font-size:11px;">開始</label><input type="number" class="form-input" id="el-page-from"></div>
-        <div style="flex:1;"><label class="form-label" style="font-size:11px;">終了</label><input type="number" class="form-input" id="el-page-to"></div>
-      </div>
-    </div>
-    <div class="form-group"><label class="form-label">参考書</label><select class="form-input" id="el-book-sel"></select></div>
-    <div class="form-group"><label class="form-label">メモ</label><input type="text" class="form-input" id="el-memo"></div>
-    <div style="display:flex;gap:8px;margin-top:4px;">
-      <button class="btn btn-d btn-full" onclick="deleteLog()">削除</button>
-      <button class="btn btn-p btn-full" onclick="saveEditedLog()">保存</button>
-    </div>
-  </div>
-</div>
-
-<!-- Textbooks -->
-<div class="modal-overlay" id="m-books" onclick="mOut(event,'m-books')">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div class="modal-title" id="m-books-title">参考書管理</div>
-    <div id="books-list" style="margin-bottom:12px;"></div>
-    <div class="form-group"><label class="form-label">参考書名を追加</label>
-      <div style="display:flex;gap:8px;">
-        <input type="text" class="form-input" id="book-new-name" placeholder="例：農業技術検定テキスト" style="flex:1;">
-        <button class="btn btn-p" onclick="addBook()">追加</button>
-      </div>
-    </div>
-    <button class="btn btn-g btn-full" style="margin-top:4px;" onclick="closeM('m-books')">閉じる</button>
-  </div>
-</div>
-
-<!-- Add/Edit Diary -->
-<div class="modal-overlay" id="m-diary" onclick="mOut(event,'m-diary')">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div class="modal-title" id="m-diary-title">今日の記録</div>
-    <div class="form-group"><label class="form-label">日付</label><input type="date" class="form-input" id="diar-date"></div>
-    <div class="form-group"><label class="form-label">日誌</label><textarea class="form-input" id="diar-content" placeholder="今日の進捗、気持ち、気づき..."></textarea></div>
-    <div class="form-group"><label class="form-label">関連スキル（任意）</label><select class="form-input" id="diar-skill"><option value="">なし</option></select></div>
-    <div style="display:flex;gap:8px;margin-top:4px;" id="diar-btns"></div>
-  </div>
-</div>
-
-<!-- Setting Edit -->
-<div class="modal-overlay" id="m-set" onclick="mOut(event,'m-set')">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div class="modal-title" id="m-set-title">設定を変更</div>
-    <div class="form-group"><label class="form-label" id="m-set-label">値</label><input class="form-input" id="m-set-input"></div>
-    <div style="display:flex;gap:8px;margin-top:4px;">
-      <button class="btn btn-g btn-full" onclick="closeM('m-set')">キャンセル</button>
-      <button class="btn btn-p btn-full" onclick="saveSetEdit()">保存</button>
-    </div>
-  </div>
-</div>
-
-<!-- Edit Todo -->
-<div class="modal-overlay" id="m-todo" onclick="mOut(event,'m-todo')">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div class="modal-title">タスクを編集</div>
-    <div class="form-group"><label class="form-label">タスク内容</label><input type="text" class="form-input" id="todo-edit-inp"></div>
-    <div style="display:flex;gap:8px;margin-top:4px;">
-      <button class="btn btn-d btn-full" onclick="deleteEditTodo()">削除</button>
-      <button class="btn btn-p btn-full" onclick="saveEditTodo()">保存</button>
-    </div>
-  </div>
-</div>
-
-<!-- Edit Savings -->
-<div class="modal-overlay" id="m-sav-edit" onclick="mOut(event,'m-sav-edit')">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div class="modal-title">貯金記録を編集</div>
-    <div class="form-group"><label class="form-label">金額（円）</label><input type="number" class="form-input" id="se-amount" style="font-family:var(--mono);font-size:16px;"></div>
-    <div class="form-group"><label class="form-label">日付</label><input type="date" class="form-input" id="se-date"></div>
-    <div style="display:flex;gap:8px;margin-top:4px;">
-      <button class="btn btn-d btn-full" onclick="deleteSavEntry()">削除</button>
-      <button class="btn btn-p btn-full" onclick="saveEditSav()">保存</button>
-    </div>
-  </div>
-</div>
-
-<!-- Add/Edit Area -->
-<div class="modal-overlay" id="m-area" onclick="mOut(event,'m-area')">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div class="modal-title" id="m-area-title">エリアを追加</div>
-    <div class="form-group"><label class="form-label">エリア名・地名</label><input type="text" class="form-input" id="an-name" placeholder="例：長野県安曇野市"></div>
-    <div class="form-group"><label class="form-label">訪問日（任意）</label><input type="date" class="form-input" id="an-date"></div>
-    <div class="form-group"><label class="form-label">カテゴリ</label>
-      <select class="form-input" id="an-cat">
-        <option value="general">🗺️ 総合メモ</option>
-        <option value="farming">🌾 農業・就農</option>
-        <option value="life">🏘️ 生活環境</option>
-        <option value="access">🚃 交通・アクセス</option>
-        <option value="cost">💴 生活コスト</option>
-      </select>
-    </div>
-    <div class="form-group"><label class="form-label">内容</label><textarea class="form-input" id="an-content" placeholder="気候、農地の状況、就農支援制度、生活環境など..." style="min-height:110px;"></textarea></div>
-    <div class="form-group"><label class="form-label">評価（任意）</label>
-      <div style="display:flex;gap:6px;">
-        <button class="btn" id="star-1" onclick="setStar(1)" style="flex:1;padding:8px;font-size:18px;background:var(--warm);">★</button>
-        <button class="btn" id="star-2" onclick="setStar(2)" style="flex:1;padding:8px;font-size:18px;background:var(--warm);">★</button>
-        <button class="btn" id="star-3" onclick="setStar(3)" style="flex:1;padding:8px;font-size:18px;background:var(--warm);">★</button>
-        <button class="btn" id="star-4" onclick="setStar(4)" style="flex:1;padding:8px;font-size:18px;background:var(--warm);">★</button>
-        <button class="btn" id="star-5" onclick="setStar(5)" style="flex:1;padding:8px;font-size:18px;background:var(--warm);">★</button>
-      </div>
-    </div>
-    <div style="display:flex;gap:8px;margin-top:4px;" id="area-btns"></div>
+<!-- プロンプトモーダル -->
+<div class="ov" id="m-prompt">
+  <div class="sh">
+    <div class="hdl"></div>
+    <div class="mtt" id="pr-title"></div>
+    <div style="font-size:13px;color:var(--mu);margin-bottom:16px" id="pr-desc"></div>
+    <input type="text" id="pr-inp">
+    <div class="brow"><button class="bs" onclick="cancelPrompt()">キャンセル</button><button class="bp" onclick="savePrompt()">保存</button></div>
   </div>
 </div>
 
 <script>
-// ━━━━ STORAGE ━━━━
-const S={g:k=>{try{return JSON.parse(localStorage.getItem('lsl_'+k))}catch(e){return null}},s:(k,v)=>localStorage.setItem('lsl_'+k,JSON.stringify(v))};
-let D={
-  name:S.g('name')||'',target_date:S.g('target_date')||'',target_place:S.g('target_place')||'',
-  target_savings:S.g('target_savings')||0,skills:S.g('skills')||[],
-  savings_log:S.g('savings_log')||[],diaries:S.g('diaries')||[],
-  todos:S.g('todos')||[],area_notes:S.g('area_notes')||[],
+// ===== データ =====
+var D = {
+  cfg: {name:"",moveDate:"",moveLoc:"",savTgt:0},
+  skills: [],
+  savings: [],
+  diaries: [],
+  areas: [],
+  todos: []
 };
-const sv=k=>S.s(k,D[k]);
 
-// ━━━━ NAV ━━━━
-function switchTab(t){
-  document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
-  document.querySelectorAll('.tab').forEach(n=>n.classList.remove('on'));
-  document.getElementById('scr-'+t).classList.add('on');
-  document.getElementById('nav-'+t).classList.add('on');
-  document.getElementById('diary-fab').style.display=t==='diary'?'flex':'none';
-  ({home:rHome,skills:rSkills,savings:rSavings,diary:rDiary,areas:rAreas,settings:rSettings})[t]?.();
+function saveD() {
+  try { localStorage.setItem("lsl3", JSON.stringify(D)); } catch(e){}
+}
+function loadD() {
+  try {
+    var raw = localStorage.getItem("lsl3") || localStorage.getItem("lsl2") || localStorage.getItem("lsl");
+    if (!raw) return;
+    var p = JSON.parse(raw);
+    // 旧フォーマット対応
+    if (p.settings && !p.cfg) {
+      D.cfg = {
+        name: p.settings.name||"",
+        moveDate: p.settings.moveDate||"",
+        moveLoc: p.settings.moveLocation||p.settings.moveLoc||"",
+        savTgt: p.settings.savingsTarget||p.settings.savTgt||0
+      };
+    } else if (p.cfg) {
+      D.cfg = p.cfg;
+    }
+    if (p.skills) {
+      D.skills = p.skills;
+      // sessions・totalMin の初期化（旧データ対応）
+      for (var i=0;i<D.skills.length;i++) {
+        if (!D.skills[i].sessions) D.skills[i].sessions = [];
+        if (!D.skills[i].totalMin) D.skills[i].totalMin = D.skills[i].totalMinutes || 0;
+        if (!D.skills[i].targetH) D.skills[i].targetH = D.skills[i].targetHours || 0;
+      }
+    }
+    if (p.savings) D.savings = p.savings;
+    if (p.diaries) D.diaries = p.diaries;
+    if (p.areas) D.areas = p.areas;
+    if (p.todos) D.todos = p.todos;
+  } catch(e){}
 }
 
-// ━━━━ MODAL ━━━━
-function openM(id){document.getElementById(id).classList.add('on');}
-function closeM(id){document.getElementById(id).classList.remove('on');}
-function mOut(e,id){if(e.target===document.getElementById(id))closeM(id);}
+// ===== UI状態 =====
+var skCatIdx=0, skLvl=0, arCatIdx=0, arStar=0, prKey="", curSkIdx=-1;
+var swTmr=null, swMs=0, swRun=false, swLaps=[];
+var ivTmr=null, ivRun=false, ivPhase="study", ivRem=0, ivCur=0, ivTotal=0, ivWork=25, ivBrk=5;
 
-// ━━━━ HELPERS ━━━━
-const today=()=>new Date().toISOString().split('T')[0];
-const fmtDate=ds=>{if(!ds)return '未設定';const[y,m,d]=ds.split('-');return y+'年'+parseInt(m)+'月'+parseInt(d)+'日';};
-const fmtYen=n=>'¥'+Math.round(n).toLocaleString();
-const daysUntil=ds=>{if(!ds)return null;const t=new Date(ds),n=new Date();n.setHours(0,0,0,0);return Math.max(0,Math.ceil((t-n)/86400000));};
-const curSav=()=>{if(!D.savings_log||!D.savings_log.length)return 0;const l=D.savings_log[D.savings_log.length-1];return(l&&typeof l.amount==='number')?l.amount:0;};
-const calcNorma=s=>{if(!s.is_exam||!s.exam_date)return null;const r=Math.max(0,s.target_hours-(s.total_logged_hours||0));const d=daysUntil(s.exam_date);if(!d)return 0;return Math.ceil((r/d)*60);};
-const fmtMs=ms=>{const s=Math.floor(ms/1000),h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sc=s%60;return`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sc).padStart(2,'0')}`;};
-const fmtMSec=s=>{return`${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;};
-const catLabel={general:'🗺️ 総合',farming:'🌾 農業',life:'🏘️ 生活',access:'🚃 交通',cost:'💴 コスト'};
+// ===== ユーティリティ =====
+function $(id) { return document.getElementById(id); }
+function today() { return new Date().toISOString().split("T")[0]; }
+function fmtD(s) {
+  if (!s) return "";
+  var d = new Date(s);
+  return d.getFullYear()+"年"+(d.getMonth()+1)+"月"+d.getDate()+"日";
+}
+function p2(n) { return n < 10 ? "0"+n : ""+n; }
+function esc(s) {
+  return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+function daysTo(s) {
+  if (!s) return null;
+  return Math.ceil((new Date(s) - new Date()) / 86400000);
+}
+function lvlTxt(n) {
+  if (n===0) return "未着手";
+  if (n<=25) return "学習中";
+  if (n<=50) return "中級";
+  if (n<=75) return "上級";
+  return "習得済み";
+}
+var CATS = ["資格","農業","技術","語学","ビジネス","その他"];
+var ACATS = ["総合メモ","農業適性","生活環境","気候","就農支援","交通"];
 
-// ━━━━ SETTINGS ━━━━
-let curSetKey='';
-const setMeta={name:{title:'名前を設定',label:'表示名',type:'text',ph:'例：尚平'},target_date:{title:'移住予定日',label:'日付',type:'date',ph:''},target_place:{title:'移住先候補',label:'地名・エリア',type:'text',ph:'例：長野県安曇野市'},target_savings:{title:'目標貯金額',label:'金額（円）',type:'number',ph:'例：3000000'}};
-function openSetEdit(k){curSetKey=k;const m=setMeta[k];document.getElementById('m-set-title').textContent=m.title;document.getElementById('m-set-label').textContent=m.label;const inp=document.getElementById('m-set-input');inp.type=m.type;inp.placeholder=m.ph;inp.value=D[k]||'';openM('m-set');setTimeout(()=>inp.focus(),300);}
-function saveSetEdit(){const v=document.getElementById('m-set-input').value.trim();if(!v)return;D[curSetKey]=curSetKey==='target_savings'?parseFloat(v)||0:v;sv(curSetKey);closeM('m-set');rSettings();rHome();if(curSetKey==='target_savings')rSavings();}
-
-// ━━━━ SKILL ━━━━
-let skIsExam=true,editSkIdx=null;
-function setSkillType(e){skIsExam=e;document.getElementById('sk-exam-f').style.display=e?'block':'none';document.getElementById('sk-skill-f').style.display=e?'none':'block';document.getElementById('sk-btn-exam').className='btn '+(e?'btn-p':'btn-g');document.getElementById('sk-btn-skill').className='btn '+(e?'btn-g':'btn-p');}
-function openAddSkill(){editSkIdx=null;document.getElementById('m-skill-title').textContent='スキルを追加';document.getElementById('sk-save-btn').textContent='追加';['sk-name','sk-target-h','sk-exam-date','sk-skill-h'].forEach(id=>document.getElementById(id).value='');setSkillType(true);openM('m-skill');}
-function openEditSkill(i){editSkIdx=i;const s=D.skills[i];document.getElementById('m-skill-title').textContent='スキルを編集';document.getElementById('sk-save-btn').textContent='保存';document.getElementById('sk-name').value=s.name;setSkillType(s.is_exam);if(s.is_exam){document.getElementById('sk-exam-date').value=s.exam_date||'';document.getElementById('sk-target-h').value=s.target_hours;}else document.getElementById('sk-skill-h').value=s.target_hours;openM('m-skill');}
-function saveSkill(){const name=document.getElementById('sk-name').value.trim();if(!name)return;const th=parseFloat(skIsExam?document.getElementById('sk-target-h').value:document.getElementById('sk-skill-h').value)||100;const ed=skIsExam?document.getElementById('sk-exam-date').value:null;if(editSkIdx!==null){const s=D.skills[editSkIdx];s.name=name;s.is_exam=skIsExam;s.target_hours=th;s.exam_date=ed;}else D.skills.push({id:Date.now(),name,is_exam:skIsExam,exam_date:ed,target_hours:th,total_logged_hours:0,logs:[],books:[]});sv('skills');closeM('m-skill');rSkills();rHome();}
-function deleteSkill(i){if(!confirm(D.skills[i].name+'を削除しますか？'))return;D.skills.splice(i,1);sv('skills');rSkills();rHome();}
-
-// ━━━━ BOOKS ━━━━
-let curBookSkIdx=null;
-function openBooks(i){curBookSkIdx=i;document.getElementById('m-books-title').textContent=D.skills[i].name+' 参考書';document.getElementById('book-new-name').value='';rBooksList();openM('m-books');}
-function rBooksList(){const el=document.getElementById('books-list');const bks=(D.skills[curBookSkIdx].books||[]);if(!bks.length){el.innerHTML='<div style="font-size:13px;color:var(--hint);padding:4px 0;">参考書が登録されていません</div>';return;}el.innerHTML=bks.map((b,i)=>`<div style="display:flex;align-items:center;padding:8px 0;border-bottom:0.5px solid var(--warm);"><div style="flex:1;font-size:13px;">📖 ${b}</div><button class="icon-btn" onclick="deleteBook(${i})">✕</button></div>`).join('');}
-function addBook(){const v=document.getElementById('book-new-name').value.trim();if(!v)return;D.skills[curBookSkIdx].books=D.skills[curBookSkIdx].books||[];D.skills[curBookSkIdx].books.push(v);sv('skills');document.getElementById('book-new-name').value='';rBooksList();}
-function deleteBook(i){D.skills[curBookSkIdx].books.splice(i,1);sv('skills');rBooksList();}
-
-// ━━━━ STUDY ━━━━
-let curStudySkIdx=null,editLogSkIdx=null,editLogIdx=null;
-let swRunning=false,swStart=null,swElapsed=0,swLaps=[],swTimer=null;
-let ivRunning=false,ivTimer=null,ivPhase='study',ivRemSec=0,ivCurSet=0,ivTotalSets=0,ivStudyMin=25,ivRestMin=5,ivTotalStudySec=0;
-function openStudy(i){curStudySkIdx=i;document.getElementById('m-study-title').textContent=D.skills[i].name+' — 学習セッション';['log-min','log-page-from','log-page-to','log-memo'].forEach(id=>document.getElementById(id).value='');fillBookSel('log-book-sel',i);setStudyTab('sw');swReset();rStudyHist(i);openM('m-study');}
-function fillBookSel(elId,skIdx){const sel=document.getElementById(elId);sel.innerHTML='<option value="">選択なし</option>';(D.skills[skIdx].books||[]).forEach(b=>{const o=document.createElement('option');o.value=b;o.textContent=b;sel.appendChild(o);});}
-function setStudyTab(t){const sw=t==='sw';document.getElementById('tab-sw').style.display=sw?'block':'none';document.getElementById('tab-iv').style.display=sw?'none':'block';const a='flex:1;padding:7px;border-radius:8px;font-size:13px;background:white;color:var(--green-mid);font-weight:700;',ia='flex:1;padding:7px;border-radius:8px;font-size:13px;background:none;color:var(--hint);';document.getElementById('tab-sw-btn').style.cssText=sw?a:ia;document.getElementById('tab-iv-btn').style.cssText=sw?ia:a;}
-function swToggle(){if(swRunning){clearInterval(swTimer);swElapsed+=Date.now()-swStart;swRunning=false;document.getElementById('sw-start-btn').textContent='再開';document.getElementById('sw-status').textContent='一時停止中';}else{swStart=Date.now();swTimer=setInterval(()=>document.getElementById('sw-time').textContent=fmtMs(swElapsed+(Date.now()-swStart)),100);swRunning=true;document.getElementById('sw-start-btn').textContent='一時停止';document.getElementById('sw-status').textContent='計測中...';}}
-function swLap(){if(!swRunning&&swElapsed===0)return;const now=swElapsed+(swRunning?Date.now()-swStart:0);swLaps.push(now);const el=document.getElementById('sw-laps');el.style.display='block';el.innerHTML=swLaps.map((t,i)=>`<div class="lap-row"><span style="color:var(--hint);">Lap ${i+1}</span><span style="font-family:var(--mono);">${fmtMs(t)}</span></div>`).reverse().join('');}
-function swReset(){clearInterval(swTimer);swRunning=false;swStart=null;swElapsed=0;swLaps=[];document.getElementById('sw-time').textContent='00:00:00';document.getElementById('sw-start-btn').textContent='開始';document.getElementById('sw-status').textContent='タップして開始';const el=document.getElementById('sw-laps');el.style.display='none';el.innerHTML='';}
-function fillFromSW(){const tot=swElapsed+(swRunning?Date.now()-swStart:0);if(tot>0)document.getElementById('log-min').value=Math.ceil(tot/60000);}
-function ivStart(){ivStudyMin=parseInt(document.getElementById('iv-study-min').value)||25;ivRestMin=parseInt(document.getElementById('iv-rest-min').value)||5;ivTotalSets=parseInt(document.getElementById('iv-sets').value)||4;ivCurSet=0;ivPhase='study';ivRemSec=ivStudyMin*60;ivTotalStudySec=0;document.getElementById('iv-config').style.display='none';document.getElementById('iv-running').style.display='block';rIvSets();ivRenderPhase();}
-function ivToggle(){if(ivRunning){clearInterval(ivTimer);ivRunning=false;document.getElementById('iv-toggle-btn').textContent='再開';}else{ivTimer=setInterval(ivTick,1000);ivRunning=true;document.getElementById('iv-toggle-btn').textContent='一時停止';}}
-function ivTick(){ivRemSec--;if(ivPhase==='study')ivTotalStudySec++;document.getElementById('iv-time').textContent=fmtMSec(ivRemSec);if(ivRemSec<=0){if(ivPhase==='study'){ivPhase='rest';ivRemSec=ivRestMin*60;}else{ivCurSet++;if(ivCurSet>=ivTotalSets){ivStop();return;}ivPhase='study';ivRemSec=ivStudyMin*60;}ivRenderPhase();rIvSets();}}
-function ivRenderPhase(){const st=ivPhase==='study';document.getElementById('iv-phase-label').textContent=st?`勉強中 — セット ${ivCurSet+1}/${ivTotalSets}`:`休憩中 — セット ${ivCurSet+1}終了`;document.getElementById('iv-time').style.color=st?'var(--green-mid)':'var(--amber)';document.getElementById('iv-time').textContent=fmtMSec(ivRemSec);}
-function ivStop(){clearInterval(ivTimer);ivRunning=false;document.getElementById('iv-running').style.display='none';document.getElementById('iv-config').style.display='block';if(ivTotalStudySec>0)document.getElementById('log-min').value=Math.ceil(ivTotalStudySec/60);}
-function rIvSets(){document.getElementById('iv-sets-disp').innerHTML=Array.from({length:ivTotalSets},(_,i)=>{let cls,lbl;if(i<ivCurSet){cls='background:var(--green-light)';lbl='完了';}else if(i===ivCurSet){cls=ivPhase==='study'?'background:var(--green-mid)':'background:var(--amber)';lbl=ivPhase==='study'?'勉強中':'休憩中';}else{cls='background:var(--warm)';lbl='待機';}return`<div class="iv-set-row"><div class="iv-dot" style="${cls}"></div><div style="flex:1;font-size:13px;">セット ${i+1}</div><div style="font-size:12px;color:var(--hint);">${lbl}</div></div>`;}).join('');}
-function logStudy(){const mins=parseFloat(document.getElementById('log-min').value);if(!mins||mins<=0)return;const s=D.skills[curStudySkIdx];s.total_logged_hours=(s.total_logged_hours||0)+mins/60;s.logs=s.logs||[];const pf=parseInt(document.getElementById('log-page-from').value)||null,pt=parseInt(document.getElementById('log-page-to').value)||null;s.logs.push({id:Date.now(),date:today(),minutes:mins,page_from:pf,page_to:pt,book:document.getElementById('log-book-sel').value||null,memo:document.getElementById('log-memo').value});sv('skills');['log-min','log-page-from','log-page-to','log-memo'].forEach(id=>document.getElementById(id).value='');rStudyHist(curStudySkIdx);rSkills();rHome();}
-function rStudyHist(i){const s=D.skills[i];const logs=(s.logs||[]).slice().reverse().slice(0,8);const el=document.getElementById('study-hist');if(!logs.length){el.innerHTML='';return;}el.innerHTML='<div style="font-size:11px;color:var(--hint);font-weight:500;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">記録履歴</div>'+logs.map((l,ri)=>{const origIdx=(s.logs||[]).length-1-ri;const pages=l.page_from&&l.page_to?` · p.${l.page_from}→${l.page_to}`:'';const bk=l.book?` 📖${l.book}`:'';return`<div class="study-log-item"><div style="flex:1;"><div style="font-family:var(--mono);font-size:13px;">${l.minutes}分${pages}</div><div style="font-size:11px;color:var(--hint);">${l.date}${bk}${l.memo?' · '+l.memo:''}</div></div><button class="icon-btn" onclick="openEditLog(${i},${origIdx})">✏️</button></div>`;}).join('');}
-function openEditLog(si,li){editLogSkIdx=si;editLogIdx=li;const l=D.skills[si].logs[li];document.getElementById('el-min').value=l.minutes;document.getElementById('el-page-from').value=l.page_from||'';document.getElementById('el-page-to').value=l.page_to||'';document.getElementById('el-memo').value=l.memo||'';fillBookSel('el-book-sel',si);document.getElementById('el-book-sel').value=l.book||'';openM('m-edit-log');}
-function saveEditedLog(){const mins=parseFloat(document.getElementById('el-min').value);if(!mins||mins<=0)return;const s=D.skills[editLogSkIdx];const oldM=s.logs[editLogIdx].minutes;s.total_logged_hours=Math.max(0,(s.total_logged_hours||0)-(oldM/60)+(mins/60));s.logs[editLogIdx]={...s.logs[editLogIdx],minutes:mins,page_from:parseInt(document.getElementById('el-page-from').value)||null,page_to:parseInt(document.getElementById('el-page-to').value)||null,book:document.getElementById('el-book-sel').value||null,memo:document.getElementById('el-memo').value};sv('skills');closeM('m-edit-log');rStudyHist(editLogSkIdx);rSkills();rHome();}
-function deleteLog(){const s=D.skills[editLogSkIdx];const m=s.logs[editLogIdx].minutes;s.total_logged_hours=Math.max(0,(s.total_logged_hours||0)-(m/60));s.logs.splice(editLogIdx,1);sv('skills');closeM('m-edit-log');rStudyHist(editLogSkIdx);rSkills();rHome();}
-
-// ━━━━ SAVINGS ━━━━
-let editSavOrigIdx=null;
-function saveSavings(){const v=parseFloat(document.getElementById('sav-input').value);if(isNaN(v)||v<0)return;D.savings_log.push({amount:v,created_at:today()});sv('savings_log');document.getElementById('sav-input').value='';rSavings();rHome();}
-function openEditSav(origIdx){editSavOrigIdx=origIdx;const l=D.savings_log[origIdx];if(!l)return;document.getElementById('se-amount').value=l.amount;document.getElementById('se-date').value=l.created_at;openM('m-sav-edit');}
-function saveEditSav(){const v=parseFloat(document.getElementById('se-amount').value);const d=document.getElementById('se-date').value;if(isNaN(v)||!d||editSavOrigIdx===null)return;D.savings_log[editSavOrigIdx]={amount:v,created_at:d};sv('savings_log');closeM('m-sav-edit');rSavings();rHome();}
-function deleteSavEntry(){if(editSavOrigIdx===null)return;D.savings_log.splice(editSavOrigIdx,1);sv('savings_log');closeM('m-sav-edit');rSavings();rHome();}
-
-// ━━━━ DIARY ━━━━
-let editDiaryIdx=null;
-function popDiarySel(selId){const sel=document.getElementById(selId);sel.innerHTML='<option value="">なし</option>';D.skills.forEach(s=>{const o=document.createElement('option');o.value=s.id;o.textContent=s.name;sel.appendChild(o);});}
-function setDiaryBtns(isEdit,idx){document.getElementById('diar-btns').innerHTML=isEdit?`<button class="btn btn-d btn-full" onclick="deleteDiary(${idx})">削除</button><button class="btn btn-p btn-full" onclick="saveDiary()">保存する</button>`:`<button class="btn btn-g btn-full" onclick="closeM('m-diary')">キャンセル</button><button class="btn btn-p btn-full" onclick="saveDiary()">保存する</button>`;}
-function openNewDiary(){editDiaryIdx=null;document.getElementById('m-diary-title').textContent='今日の記録';document.getElementById('diar-date').value=today();document.getElementById('diar-content').value='';popDiarySel('diar-skill');setDiaryBtns(false,null);openM('m-diary');}
-function openEditDiary(i){editDiaryIdx=i;const d=D.diaries[i];document.getElementById('m-diary-title').textContent='記録を編集';document.getElementById('diar-date').value=d.date;document.getElementById('diar-content').value=d.content;popDiarySel('diar-skill');document.getElementById('diar-skill').value=d.linked_skill_id||'';setDiaryBtns(true,i);openM('m-diary');}
-function saveDiary(){const c=document.getElementById('diar-content').value.trim();if(!c)return;const date=document.getElementById('diar-date').value||today();const lk=document.getElementById('diar-skill').value||null;if(editDiaryIdx!==null)D.diaries[editDiaryIdx]={...D.diaries[editDiaryIdx],date,content:c,linked_skill_id:lk};else D.diaries.unshift({id:Date.now(),date,content:c,linked_skill_id:lk});D.diaries.sort((a,b)=>b.date.localeCompare(a.date));sv('diaries');closeM('m-diary');rDiary();rHome();}
-function deleteDiary(i){D.diaries.splice(i,1);sv('diaries');closeM('m-diary');rDiary();rHome();}
-
-// ━━━━ AREA ━━━━
-let editAreaIdx=null,curStar=0;
-function setStar(n){curStar=n;for(let i=1;i<=5;i++){const b=document.getElementById('star-'+i);b.style.background=i<=n?'var(--amber)':'var(--warm)';b.style.color=i<=n?'white':'var(--hint)';}}
-function openNewArea(){editAreaIdx=null;curStar=0;document.getElementById('m-area-title').textContent='エリアを追加';['an-name','an-content'].forEach(id=>document.getElementById(id).value='');document.getElementById('an-date').value=today();document.getElementById('an-cat').value='general';setStar(0);document.getElementById('area-btns').innerHTML=`<button class="btn btn-g btn-full" onclick="closeM('m-area')">キャンセル</button><button class="btn btn-p btn-full" onclick="saveArea()">追加</button>`;openM('m-area');}
-function openEditArea(i){editAreaIdx=i;const a=D.area_notes[i];document.getElementById('m-area-title').textContent='エリアを編集';document.getElementById('an-name').value=a.name||'';document.getElementById('an-date').value=a.date||'';document.getElementById('an-cat').value=a.cat||'general';document.getElementById('an-content').value=a.content||'';curStar=a.star||0;setStar(curStar);document.getElementById('area-btns').innerHTML=`<button class="btn btn-d btn-full" onclick="deleteArea(${i})">削除</button><button class="btn btn-p btn-full" onclick="saveArea()">保存する</button>`;openM('m-area');}
-function saveArea(){const name=document.getElementById('an-name').value.trim();if(!name)return;const entry={id:editAreaIdx!==null?D.area_notes[editAreaIdx].id:Date.now(),name,date:document.getElementById('an-date').value,cat:document.getElementById('an-cat').value,content:document.getElementById('an-content').value.trim(),star:curStar};if(editAreaIdx!==null)D.area_notes[editAreaIdx]=entry;else D.area_notes.unshift(entry);sv('area_notes');closeM('m-area');rAreas();}
-function deleteArea(i){D.area_notes.splice(i,1);sv('area_notes');closeM('m-area');rAreas();}
-
-// ━━━━ TODO ━━━━
-let editTodoId=null;
-function addTodo(){const v=document.getElementById('todo-new').value.trim();if(!v)return;D.todos.push({id:Date.now(),text:v,done:false});sv('todos');document.getElementById('todo-new').value='';rTodos();}
-function toggleTodo(id){const t=D.todos.find(t=>t.id===id);if(t){t.done=!t.done;sv('todos');rTodos();}}
-function openEditTodo(id){editTodoId=id;const t=D.todos.find(t=>t.id===id);if(t)document.getElementById('todo-edit-inp').value=t.text;openM('m-todo');setTimeout(()=>document.getElementById('todo-edit-inp').focus(),300);}
-function saveEditTodo(){const v=document.getElementById('todo-edit-inp').value.trim();if(!v)return;const t=D.todos.find(t=>t.id===editTodoId);if(t){t.text=v;sv('todos');}closeM('m-todo');rTodos();}
-function deleteEditTodo(){D.todos=D.todos.filter(t=>t.id!==editTodoId);sv('todos');closeM('m-todo');rTodos();}
-function rTodos(){const el=document.getElementById('todo-list');if(!D.todos.length){el.innerHTML='<div style="padding:8px 0;font-size:13px;color:var(--hint);">タスクはありません</div>';return;}el.innerHTML=D.todos.map(t=>`<div class="todo-item"><div class="todo-check${t.done?' done':''}" onclick="toggleTodo(${t.id})"></div><div style="font-size:13px;color:${t.done?'var(--hint)':'var(--text)'};flex:1;text-decoration:${t.done?'line-through':'none'};line-height:1.5;">${t.text}</div><div style="display:flex;gap:2px;flex-shrink:0;"><button class="icon-btn" onclick="openEditTodo(${t.id})">✏️</button><button class="icon-btn" onclick="(D.todos=D.todos.filter(x=>x.id!==${t.id}),sv('todos'),rTodos())">✕</button></div></div>`).join('');}
-
-// ━━━━ RENDER HOME ━━━━
-function rHome(){
-  const now=new Date();
-  document.getElementById('home-date').textContent=now.getFullYear()+'年'+(now.getMonth()+1)+'月'+now.getDate()+'日';
-  document.getElementById('home-avatar').textContent=D.name?D.name.slice(0,1):'?';
-  const days=daysUntil(D.target_date);
-  document.getElementById('cd-num').innerHTML=(days!==null?days:'—')+'<span>日</span>';
-  document.getElementById('cd-target').innerHTML=`<b>${D.target_date?fmtDate(D.target_date):'未設定'}</b>${D.target_place?' · '+D.target_place:''}`;
-  const sav=curSav(),tgt=D.target_savings||0,pct=tgt?Math.min(100,Math.round(sav/tgt*100)):0;
-  document.getElementById('home-pct').textContent=pct+'%';
-  document.getElementById('home-sav').innerHTML=fmtYen(sav)+(tgt?`<span style="font-size:12px;color:var(--hint);font-weight:400;margin-left:2px;">/${fmtYen(tgt)}</span>`:'');
-  document.getElementById('home-sav-pct').textContent=pct+'%';
-  document.getElementById('home-gauge').style.width=pct+'%';
-  const exS=D.skills.filter(s=>s.is_exam&&s.exam_date);
-  const ns=document.getElementById('norma-sec');
-  if(exS.length){const mins=exS.reduce((sum,s)=>sum+(calcNorma(s)||0),0);ns.innerHTML=`<div class="norma-badge"><div style="font-size:22px;">🎯</div><div style="flex:1;"><div style="font-size:11px;color:rgba(255,255,255,0.7);">今日の学習ノルマ</div><div style="font-family:var(--mono);font-size:20px;font-weight:700;">${mins}<span style="font-size:12px;font-weight:400;color:rgba(255,255,255,0.6);">分</span></div></div><div style="font-size:11px;color:rgba(255,255,255,0.45);">${exS.length}科目</div></div>`;}else ns.innerHTML='';
-  document.getElementById('home-skills').innerHTML=!D.skills.length?'<div style="text-align:center;padding:18px 0;color:var(--hint);font-size:13px;">スキルを追加してみましょう</div>':D.skills.slice(0,3).map((s,i,a)=>{const p=Math.min(100,Math.round((s.total_logged_hours/s.target_hours)*100));const bdr=i<Math.min(a.length,3)-1?'border-bottom:0.5px solid var(--warm);':'';return`<div style="display:flex;align-items:center;gap:12px;padding:10px 0;${bdr}"><div style="width:36px;height:36px;border-radius:10px;background:var(--cream);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">${s.is_exam?'📋':'🌿'}</div><div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:500;">${s.name}</div><div style="font-size:11px;color:var(--hint);">${s.total_logged_hours.toFixed(1)}h / ${s.target_hours}h</div><div style="height:4px;background:var(--warm);border-radius:2px;margin-top:4px;overflow:hidden;"><div style="height:100%;width:${p}%;background:var(--green-light);border-radius:2px;"></div></div></div><div style="font-family:var(--mono);font-size:13px;color:var(--sub);">${p}%</div></div>`;}).join('');
-  document.getElementById('home-diary').innerHTML=!D.diaries.length?'<div style="text-align:center;padding:14px 0;color:var(--hint);font-size:13px;">まだ記録がありません</div>':(d=>`<div style="font-size:10px;color:var(--hint);font-family:var(--mono);margin-bottom:3px;">${d.date}</div><div style="font-size:13px;line-height:1.6;">${d.content.length>80?d.content.slice(0,80)+'…':d.content}</div>`)(D.diaries[0]);
+// ===== ナビゲーション =====
+function go(t) {
+  var tabs = ["home","skills","savings","diary","area"];
+  for (var i=0;i<tabs.length;i++) {
+    var s = document.getElementById("s-"+tabs[i]);
+    var tb = document.getElementById("tb-"+tabs[i]);
+    if (s) s.className = "scr" + (tabs[i]===t?" on":"");
+    if (tb) tb.className = "ti" + (tabs[i]===t?" on":"");
+  }
+  if (t==="home") renderHome();
+  if (t==="skills") renderSkills();
+  if (t==="savings") renderSavings();
+  if (t==="diary") renderDiary();
+  if (t==="area") renderArea();
 }
 
-// ━━━━ RENDER SKILLS ━━━━
-function rSkills(){
-  const c=document.getElementById('skills-list');
-  if(!D.skills.length){c.innerHTML=`<div class="card" style="text-align:center;padding:28px 16px;color:var(--hint);"><div style="font-size:34px;margin-bottom:8px;">📚</div><div style="font-size:14px;">まだスキルが登録されていません</div></div>`;return;}
-  c.innerHTML=D.skills.map((s,i)=>{
-    const p=Math.min(100,Math.round((s.total_logged_hours/s.target_hours)*100));
-    const norma=s.is_exam?calcNorma(s):null;const dLeft=s.exam_date?daysUntil(s.exam_date):null;
-    const bkCount=(s.books||[]).length;
-    const totalPages=(s.logs||[]).reduce((sum,l)=>(l.page_from&&l.page_to)?sum+(l.page_to-l.page_from):sum,0);
-    return`<div class="card" style="padding:16px;">
-      <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:12px;">
-        <div style="width:42px;height:42px;border-radius:12px;background:var(--cream);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">${s.is_exam?'📋':'🌿'}</div>
-        <div style="flex:1;"><div style="font-size:15px;font-weight:700;color:var(--green-dark);">${s.name}</div>
-          <div style="display:flex;gap:5px;margin-top:4px;flex-wrap:wrap;">
-            <span class="chip ${s.is_exam?'chip-am':'chip-g'}">${s.is_exam?'資格':'スキル'}</span>
-            ${dLeft!==null?`<span class="chip chip-sk">試験まで${dLeft}日</span>`:''}
-            ${bkCount?`<span class="chip chip-g">📖 ${bkCount}冊</span>`:''}
-          </div>
-        </div>
-        <button class="icon-btn" onclick="openEditSkill(${i})">✏️</button>
-        <button class="icon-btn" onclick="deleteSkill(${i})">✕</button>
-      </div>
-      <div style="display:flex;justify-content:space-between;margin-bottom:5px;">
-        <span style="font-size:12px;color:var(--hint);">進捗</span>
-        <span style="font-family:var(--mono);font-size:12px;color:var(--sub);">${s.total_logged_hours.toFixed(1)}h / ${s.target_hours}h${totalPages?` · 計${totalPages}p`:''}</span>
-      </div>
-      <div class="gauge-track" style="height:7px;"><div class="gauge-fill" style="width:${p}%;"></div></div>
-      ${norma!==null?`<div style="margin-top:10px;padding:8px 12px;background:var(--cream);border-radius:8px;display:flex;justify-content:space-between;align-items:center;"><span style="font-size:12px;color:var(--sub);">今日のノルマ</span><span style="font-family:var(--mono);font-size:15px;font-weight:700;color:var(--amber);">${norma}分</span></div>`:''}
-      <div style="display:flex;gap:8px;margin-top:10px;">
-        <button class="btn btn-p" style="flex:1;padding:11px;" onclick="openStudy(${i})">⏱ 学習セッション</button>
-        <button class="btn btn-g" style="padding:11px 14px;" onclick="openBooks(${i})">📖</button>
-      </div>
-    </div>`;
-  }).join('');
+// ===== モーダル =====
+function openMod(id) {
+  if (id==="m-diary") {
+    $("dr-date").value = today();
+    var sel=$("dr-sk"); sel.innerHTML="<option value=''>なし</option>";
+    for (var i=0;i<D.skills.length;i++) {
+      var o=document.createElement("option");o.value=D.skills[i].name;o.textContent=D.skills[i].name;sel.appendChild(o);
+    }
+  }
+  if (id==="m-area") {
+    $("ar-date").value=today(); arStar=0; updStars();
+    var chips=document.querySelectorAll("#ar-cats .chip");
+    for (var i=0;i<chips.length;i++) chips[i].className="chip"+(i===0?" on":"");
+    arCatIdx=0;
+  }
+  if (id==="m-skill") {
+    skCatIdx=0; skLvl=0;
+    var cc=document.querySelectorAll("#sk-cats .chip"); for(var i=0;i<cc.length;i++) cc[i].className="chip"+(i===0?" on":"");
+    var lc=document.querySelectorAll("#sk-lvls .lvl"); for(var i=0;i<lc.length;i++) lc[i].className="lvl"+(i===0?" on":"");
+    var ids=["sk-name","sk-memo","sk-books","sk-exam","sk-thrs"]; for(var i=0;i<ids.length;i++){var el=$(ids[i]);if(el)el.value="";}
+  }
+  if (id==="m-settings") { renderSettings(); renderTodos(); }
+  $(id).className="ov on";
+}
+function closeMod(id) { $(id).className="ov"; }
+
+(function(){
+  var ovs=document.querySelectorAll(".ov");
+  for (var i=0;i<ovs.length;i++) {
+    (function(el){ el.addEventListener("click",function(e){ if(e.target===el) el.className="ov"; }); })(ovs[i]);
+  }
+})();
+
+// ===== 設定 =====
+function showSettings() { openMod("m-settings"); }
+function renderSettings() {
+  $("sv-name").textContent=D.cfg.name||"未設定";
+  $("sv-date").textContent=D.cfg.moveDate||"未設定";
+  $("sv-loc").textContent=D.cfg.moveLoc||"未設定";
+  $("sv-tgts").textContent=D.cfg.savTgt?"¥"+Number(D.cfg.savTgt).toLocaleString():"未設定";
+}
+function openPrompt(key,title,desc,type) {
+  prKey=key;
+  $("pr-title").textContent=title; $("pr-desc").textContent=desc;
+  var inp=$("pr-inp"); inp.type=type||"text"; inp.value=D.cfg[key]||"";
+  closeMod("m-settings"); $("m-prompt").className="ov on";
+}
+function cancelPrompt() { closeMod("m-prompt"); openMod("m-settings"); }
+function savePrompt() {
+  var v=$("pr-inp").value.trim();
+  D.cfg[prKey]=prKey==="savTgt"?Number(v)||0:v;
+  saveD(); closeMod("m-prompt"); openMod("m-settings"); renderSettings(); renderHome();
 }
 
-// ━━━━ RENDER SAVINGS ━━━━
-function rSavings(){
-  const sav=curSav(),tgt=D.target_savings||0,pct=tgt?Math.min(100,Math.round(sav/tgt*100)):0,circ=226.19;
-  document.getElementById('sav-pct-n').textContent=pct;
-  document.getElementById('sav-cur').textContent=fmtYen(sav);
-  document.getElementById('sav-tgt-d').textContent=tgt?fmtYen(tgt):'未設定';
-  document.getElementById('sav-rem').textContent=tgt?'残り '+fmtYen(Math.max(0,tgt-sav)):'設定から目標を入力してください';
-  document.getElementById('sav-circle').setAttribute('stroke-dashoffset',circ-(circ*pct/100));
-  const g=document.getElementById('sav-graph');
-  if(!D.savings_log.length){g.innerHTML='<div style="flex:1;text-align:center;padding:18px 0;color:var(--hint);font-size:12px;">まだ記録がありません</div>';}
-  else{const logs=D.savings_log.slice(-8);const maxA=Math.max(...logs.map(l=>l.amount),1);g.innerHTML=logs.map((l,i)=>{const h=Math.max(8,Math.round((l.amount/maxA)*90));return`<div class="sav-bar-wrap"><div class="sav-bar${i===logs.length-1?' cur':''}" style="height:${h}px;"></div><div style="font-size:8px;color:var(--hint);font-family:var(--mono);">${l.created_at.slice(5).replace('-','/')}</div></div>`;}).join('');}
-  const hist=document.getElementById('sav-hist');
-  if(!D.savings_log.length){hist.innerHTML='<div style="color:var(--hint);font-size:13px;padding:8px 0;">記録がありません</div>';return;}
-  hist.innerHTML=D.savings_log.map((l,i)=>({i,l})).reverse().slice(0,10).map(({i:origIdx,l})=>{
-    const prev=origIdx>0?D.savings_log[origIdx-1]:null;
-    const diff=prev!=null?l.amount-prev.amount:null;
-    const ds=diff!==null?(diff>=0?`<span style="color:var(--green-mid);font-size:11px;">+${fmtYen(diff)}</span>`:`<span style="color:var(--rust);font-size:11px;">${fmtYen(diff)}</span>`):'';
-    return`<div class="sav-row"><div><div style="font-family:var(--mono);font-size:13px;">${fmtYen(l.amount)}</div><div style="font-size:11px;color:var(--hint);">${l.created_at}</div></div><div style="display:flex;align-items:center;gap:6px;">${ds}<button class="icon-btn" onclick="openEditSav(${origIdx})">✏️</button></div></div>`;
-  }).join('');
+// ===== TODO =====
+function renderTodos() {
+  var el=$("tdlist"); var h="";
+  for (var i=0;i<D.todos.length;i++) {
+    var t=D.todos[i];
+    h+="<div class='tditm'>"
+      +"<div class='tdck"+(t.done?" dn":"")+"' onclick='togTodo("+i+")'></div>"
+      +"<div class='tdt"+(t.done?" dn":"")+"'>"+esc(t.text)+"</div>"
+      +"<div class='tddl' onclick='delTodo("+i+")'>&#215;</div></div>";
+  }
+  el.innerHTML=h;
+}
+function addTodo(){
+  var v=$("td-inp").value.trim(); if(!v)return;
+  D.todos.push({text:v,done:false}); $("td-inp").value=""; saveD(); renderTodos();
+}
+function togTodo(i){D.todos[i].done=!D.todos[i].done;saveD();renderTodos();}
+function delTodo(i){D.todos.splice(i,1);saveD();renderTodos();}
+
+// ===== ホーム =====
+function renderHome() {
+  var now=new Date();
+  $("h-date").textContent=now.getFullYear()+"年"+(now.getMonth()+1)+"月"+now.getDate()+"日";
+  if (D.cfg.moveDate) {
+    var diff=Math.ceil((new Date(D.cfg.moveDate)-now)/86400000);
+    $("h-cnt").textContent=diff>0?diff:"0";
+    $("h-loc").textContent=D.cfg.moveLoc||"未設定";
+  } else {
+    $("h-cnt").textContent="—"; $("h-loc").textContent="未設定";
+  }
+  var cur=D.savings.length?D.savings[D.savings.length-1].amount:0;
+  var tgt=Number(D.cfg.savTgt)||0; var pct=tgt>0?Math.min(100,Math.round(cur/tgt*100)):0;
+  $("h-sav").textContent="¥"+cur.toLocaleString();
+  $("h-spct").textContent=pct+"%"; $("h-sbar").style.width=pct+"%"; $("h-pct").textContent=pct+"%";
+  var sc=$("h-skcard"); var h="";
+  if (!D.skills.length) {
+    sc.innerHTML="<div class='empty'><span>スキルを追加してみましょう</span></div>";
+  } else {    for (var i=0;i<Math.min(3,D.skills.length);i++) {
+      var s=D.skills[i]; var st=Math.round(s.level/25);
+      h+="<div class='ski'><div><div class='skn'>"+esc(s.name)+"</div><div class='skl'>"+esc(s.cat)+" · "+lvlTxt(s.level)+"</div></div>"
+        +"<div class='sks'>"+"★".repeat(st)+"☆".repeat(4-st)+"</div></div>";
+    }
+    sc.innerHTML=h;
+  }
+  var dc=$("h-drcard"); h="";
+  if (!D.diaries.length) {
+    dc.innerHTML="<div class='empty'><span>まだ記録がありません</span></div>";
+  } else {
+    var arr=D.diaries.slice().reverse();
+    for (var i=0;i<Math.min(2,arr.length);i++) {
+      var d=arr[i]; var prev=d.text.length>60?d.text.slice(0,60)+"…":d.text;
+      h+="<div class='di2'><div class='dil'>"+fmtD(d.date)+"</div><div class='dit'>"+esc(prev)+"</div></div>";
+    }
+    dc.innerHTML=h;
+  }
 }
 
-// ━━━━ RENDER DIARY ━━━━
-function rDiary(){
-  const now=new Date(),y=now.getFullYear(),m=now.getMonth();
-  document.getElementById('diary-month').textContent=y+'年'+(m+1)+'月';
-  document.getElementById('cal-head').innerHTML=['日','月','火','水','木','金','土'].map(d=>`<div class="cal-head-cell">${d}</div>`).join('');
-  const fd=new Date(y,m,1).getDay(),dim=new Date(y,m+1,0).getDate(),td=now.getDate();
-  const dd=new Set(D.diaries.map(d=>d.date));let html='';
-  for(let i=0;i<fd;i++)html+='<div class="cal-day empty"></div>';
-  for(let d=1;d<=dim;d++){const ds=y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');const has=dd.has(ds),isT=d===td;html+=`<div class="cal-day${isT?' today':has?' has':''}" onclick="calClick('${ds}')">${d}${has&&!isT?'<div class="cal-dot"></div>':''}</div>`;}
-  document.getElementById('cal-body').innerHTML=html;
-  const c=document.getElementById('diary-list');
-  if(!D.diaries.length){c.innerHTML=`<div class="card" style="text-align:center;padding:22px;color:var(--hint);font-size:13px;"><div style="font-size:30px;margin-bottom:8px;">📖</div>まだ日誌がありません</div>`;return;}
-  c.innerHTML='<div style="padding:0 16px 8px;">'+D.diaries.slice(0,15).map((d,i)=>{const lk=d.linked_skill_id?D.skills.find(s=>s.id==d.linked_skill_id):null;return`<div class="log-entry" style="cursor:pointer;" onclick="openEditDiary(${i})"><div style="display:flex;justify-content:space-between;"><div style="font-size:10px;color:var(--hint);font-family:var(--mono);margin-bottom:3px;">${d.date}</div><span style="font-size:11px;color:var(--sky);">編集 ✏️</span></div><div style="font-size:13px;line-height:1.6;">${d.content.length>60?d.content.slice(0,60)+'…':d.content}</div>${lk?`<div style="margin-top:6px;"><span style="padding:3px 8px;background:var(--cream);color:var(--sub);border-radius:6px;font-size:11px;font-weight:500;">${lk.name}</span></div>`:''}</div>`;}).join('')+'</div>';
+// ===== スキル =====
+function pickCat(idx) {
+  skCatIdx=idx;
+  var cc=document.querySelectorAll("#sk-cats .chip"); for(var i=0;i<cc.length;i++) cc[i].className="chip"+(i===idx?" on":"");
 }
-function calClick(ds){const i=D.diaries.findIndex(d=>d.date===ds);if(i>=0)openEditDiary(i);else{editDiaryIdx=null;document.getElementById('m-diary-title').textContent=fmtDate(ds)+'の記録';document.getElementById('diar-date').value=ds;document.getElementById('diar-content').value='';popDiarySel('diar-skill');setDiaryBtns(false,null);openM('m-diary');}}
-
-// ━━━━ RENDER AREAS ━━━━
-function rAreas(){
-  const c=document.getElementById('area-list');
-  if(!D.area_notes.length){c.innerHTML=`<div style="text-align:center;padding:40px 24px;color:var(--hint);"><div style="font-size:40px;margin-bottom:12px;">🗺️</div><div style="font-size:14px;margin-bottom:4px;color:var(--sub);font-weight:500;">エリアノートがありません</div><div style="font-size:12px;">訪問した街や候補地の情報を記録しましょう</div></div>`;return;}
-  c.innerHTML=D.area_notes.map((a,i)=>{
-    const stars=a.star?'★'.repeat(a.star)+'☆'.repeat(5-a.star):'';
-    const preview=a.content?(a.content.length>55?a.content.slice(0,55)+'…':a.content):'';
-    return`<div class="area-card" onclick="openEditArea(${i})">
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px;">
-        <div style="font-size:15px;font-weight:700;color:var(--green-dark);flex:1;">${a.name}</div>
-        ${stars?`<div style="font-size:12px;color:var(--amber);flex-shrink:0;letter-spacing:-1px;">${stars}</div>`:''}
-      </div>
-      <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap;">
-        <span class="area-tag ${a.cat||'general'}">${catLabel[a.cat]||catLabel.general}</span>
-        ${a.date?`<span style="font-size:11px;color:var(--hint);font-family:var(--mono);">${a.date}</span>`:''}
-      </div>
-      ${preview?`<div style="font-size:13px;color:var(--sub);line-height:1.55;">${preview}</div>`:''}
-      <div style="font-size:11px;color:var(--hint);margin-top:6px;text-align:right;">タップして編集 ✏️</div>
-    </div>`;
-  }).join('');
+function pickLv(el,v) {
+  skLvl=v;
+  var lc=document.querySelectorAll("#sk-lvls .lvl"); for(var i=0;i<lc.length;i++) lc[i].className="lvl";
+  el.className="lvl on";
+}
+function addSkill() {
+  var nm=$("sk-name").value.trim(); if(!nm)return;
+  D.skills.push({
+    name:nm, cat:CATS[skCatIdx], level:skLvl,
+    examDate:$("sk-exam").value||"",
+    targetH:Number($("sk-thrs").value)||0,
+    books:$("sk-books").value.trim(),
+    memo:$("sk-memo").value.trim(),
+    sessions:[], totalMin:0,
+    created:today()
+  });
+  saveD(); closeMod("m-skill"); renderSkills(); renderHome();
 }
 
-// ━━━━ RENDER SETTINGS ━━━━
-function rSettings(){
-  document.getElementById('set-name').textContent=D.name||'未設定';
-  document.getElementById('set-date').textContent=D.target_date?fmtDate(D.target_date):'未設定';
-  document.getElementById('set-place').textContent=D.target_place||'未設定';
-  document.getElementById('set-sav').textContent=D.target_savings?fmtYen(D.target_savings):'未設定';
-  rTodos();
+function renderSkills() {
+  var el=$("skilllist");
+  if(!D.skills.length){el.innerHTML="<div class='card'><div class='empty'><span>スキルがまだ登録されていません</span></div></div>";return;}
+  var h="";
+  for (var i=0;i<D.skills.length;i++) {
+    var s=D.skills[i]; var days=daysTo(s.examDate);
+    var urg=days!==null&&days<=30&&days>0; var past=days!==null&&days<=0;
+    // 試験日バッジ
+    var exH="";
+    if(s.examDate){
+      if(past) exH="<div class='exbdg urg'>&#128197; 試験終了（"+fmtD(s.examDate)+"）</div>";
+      else exH="<div class='exbdg"+(urg?" urg pulse":"")+"'>&#128197; 試験まで <strong>"+days+"</strong>日（"+fmtD(s.examDate)+"）</div>";
+    }
+    // 本日の目安
+    var dtH="";
+    if(s.targetH&&s.examDate&&days&&days>0){
+      var rem=Math.max(0,s.targetH*60-s.totalMin);
+      var dt=rem<=0?0:Math.ceil(rem/days);
+      dtH=dt===0
+        ?"<div style='font-size:12px;color:#4caf82;margin-top:6px'>&#127881; 目標学習時間を達成しました！</div>"
+        :"<div style='font-size:12px;color:var(--wa);margin-top:6px'>&#128214; 本日の目安：<strong>"+dt+"</strong>分（残り"+rem+"分 ／ 目標"+s.targetH+"時間）</div>";
+    }
+    var th=Math.floor(s.totalMin/60), tm=s.totalMin%60;
+    // 学習履歴（常時表示・最新順）
+    var histH="";
+    if(s.sessions.length>0){
+      var sessRows="";
+      var recent=s.sessions.slice().reverse();
+      for(var j=0;j<recent.length;j++){
+        var ses=recent[j];
+        var detailParts=[];
+        if(ses.pageFrom&&ses.pageTo) detailParts.push("p."+esc(ses.pageFrom)+"〜"+esc(ses.pageTo));
+        if(ses.book) detailParts.push("&#128214; "+esc(ses.book));
+        var detailStr=detailParts.length?"<div class='shist-detail'>"+detailParts.join("　")+"</div>":"";
+        var memoStr=ses.memo?"<div class='shist-memo'>"+esc(ses.memo)+"</div>":"";
+        sessRows+="<div class='shist-item'>"
+          +"<div class='shist-row'>"
+          +"<div class='shist-left'>"
+          +"<div class='shist-date'>"+fmtD(ses.date)+"</div>"
+          +detailStr+memoStr
+          +"</div>"
+          +"<div class='shist-min'>"+ses.minutes+"分</div>"
+          +"</div></div>";
+      }
+      histH="<div class='shist'>"
+        +"<div class='shist-title'>学習記録<span class='shist-count'>"+s.sessions.length+"件</span></div>"
+        +"<div class='shist-list'>"+sessRows+"</div></div>";
+    }
+    h+="<div class='sfi'>"
+      +"<div class='sfh'><div style='flex:1'><div class='sfn'>"+esc(s.name)+"</div><div class='sfc'>"+esc(s.cat)+"</div></div>"
+      +"<div style='color:var(--li);cursor:pointer;font-size:20px;padding-left:8px' onclick='delSkill("+i+")'>&#215;</div></div>"
+      +"<div class='spb'><div class='spbf' style='width:"+s.level+"%'></div></div>"
+      +"<div class='smeta'><span>"+lvlTxt(s.level)+"</span><span>"+s.level+"%</span></div>"
+      +exH+dtH
+      +"<div class='sstats'>"
+      +"<div class='sstat'><div class='sstatv'>"+th+"h"+tm+"m</div><div class='sstatl'>累計学習</div></div>"
+      +"<div class='sstat'><div class='sstatv'>"+s.sessions.length+"</div><div class='sstatl'>セッション数</div></div>"
+      +"<div class='sstat'><div class='sstatv'>"+(s.targetH?s.targetH+"h":"—")+"</div><div class='sstatl'>目標時間</div></div>"
+      +"</div>"
+      +(s.books?"<div style='font-size:12px;color:var(--mu);margin-top:8px'>&#128214; "+esc(s.books)+"</div>":"")
+      +(s.memo?"<div style='font-size:12px;color:var(--mu);margin-top:6px;line-height:1.5'>"+esc(s.memo)+"</div>":"")
+      +histH
+      +"<div class='sact'>"
+      +"<div class='sab hi' onclick='openStudy("+i+")'>&#9654; 学習セッション</div>"
+      +"<div class='sab' onclick='cycLv("+i+")'>習熟度を更新</div>"
+      +"</div></div>";
+  }
+  el.innerHTML=h;
+}
+function delSkill(i){if(confirm("このスキルを削除しますか？\n削除すると学習記録もすべて消えます。")){D.skills.splice(i,1);saveD();renderSkills();}}
+function cycLv(i){var ls=[0,25,50,75,100];var c=ls.indexOf(D.skills[i].level);D.skills[i].level=ls[(c+1)%ls.length];saveD();renderSkills();renderHome();}
+
+// ===== 学習セッション =====
+function openStudy(i) {
+  curSkIdx=i; var s=D.skills[i]; $("st-sknm").textContent=s.name;
+  var sel=$("rec-book"); sel.innerHTML="<option value=''>選択なし</option>";
+  if(s.books){
+    var bs=s.books.split("、");
+    for(var j=0;j<bs.length;j++){
+      if(!bs[j].trim())continue;
+      var o=document.createElement("option");o.value=bs[j].trim();o.textContent=bs[j].trim();sel.appendChild(o);
+    }
+  }
+  swReset();ivReset();swTab();
+  var ids=["rec-min","rec-pf","rec-pt","rec-memo"];for(var j=0;j<ids.length;j++){var el=$(ids[j]);if(el)el.value="";}
+  $("m-study").className="ov on";
+}
+function closeStudy(){closeMod("m-study");swReset();ivReset();}
+
+function swTab(){$("sw-pnl").style.display="block";$("iv-pnl").style.display="none";$("sw-tab").className="tti2 on";$("iv-tab").className="tti2";}
+function ivTab(){$("sw-pnl").style.display="none";$("iv-pnl").style.display="block";$("sw-tab").className="tti2";$("iv-tab").className="tti2 on";}
+
+function swToggle(){
+  if(swRun){
+    clearInterval(swTmr);swRun=false;
+    $("sw-gbtn").textContent="再開";$("sw-hint").textContent="一時停止中";
+  } else {
+    var st=Date.now()-swMs;
+    swTmr=setInterval(function(){swMs=Date.now()-st;swUpd();},50);
+    swRun=true;$("sw-gbtn").textContent="一時停止";$("sw-hint").textContent="計測中…";
+  }
+}
+function swReset(){clearInterval(swTmr);swRun=false;swMs=0;swLaps=[];swUpd();$("laplist").innerHTML="";$("sw-gbtn").textContent="開始";$("sw-hint").textContent="タップして開始";}
+function swLap(){if(!swRun&&swMs===0)return;swLaps.push(swMs);swRenderLaps();}
+function swUpd(){var h=Math.floor(swMs/3600000),m=Math.floor(swMs%3600000/60000),s=Math.floor(swMs%60000/1000);$("sw-disp").textContent=p2(h)+":"+p2(m)+":"+p2(s);}
+function swRenderLaps(){var h="";for(var i=swLaps.length-1;i>=0;i--){var t=swLaps[i];h+="<div class='litem'><span class='lnum'>ラップ "+(i+1)+"</span><span class='ltm'>"+p2(Math.floor(t/3600000))+":"+p2(Math.floor(t%3600000/60000))+":"+p2(Math.floor(t%60000/1000))+"</span></div>";}$("laplist").innerHTML=h;}
+function fillSW(){$("rec-min").value=Math.floor(swMs/60000)||"";}
+
+function ivToggle(){
+  if(ivRun){clearInterval(ivTmr);ivRun=false;$("iv-gbtn").textContent="再開";}
+  else{
+    if(ivCur===0){
+      ivWork=parseInt($("iv-wk").value)||25;ivBrk=parseInt($("iv-bk").value)||5;ivTotal=parseInt($("iv-st").value)||4;
+      ivPhase="study";ivCur=1;ivRem=ivWork*60;
+      $("iv-inps").style.display="none";$("iv-rbtn").style.display="block";
+    }
+    var end=Date.now()+ivRem*1000;
+    ivTmr=setInterval(function(){ivRem=Math.max(0,Math.ceil((end-Date.now())/1000));ivUpd();if(ivRem<=0)ivNext();},200);
+    ivRun=true;$("iv-gbtn").textContent="一時停止";ivUpdStatus();
+  }
+}
+function ivNext(){clearInterval(ivTmr);ivRun=false;if(ivPhase==="study"){if(ivCur<ivTotal){ivPhase="break";ivRem=ivBrk*60;}else{ivDone();return;}}else{ivPhase="study";ivCur++;ivRem=ivWork*60;}ivUpdStatus();setTimeout(ivToggle,600);}
+function ivDone(){ivRun=false;$("iv-bdg").textContent="✅ 完了！";$("iv-bdg").className="ivbdg ivd";$("iv-info").textContent="全"+ivTotal+"セット完了";$("iv-disp").textContent="00:00";$("iv-gbtn").textContent="インターバル開始";$("rec-min").value=ivWork*ivTotal;ivCur=0;}
+function ivReset(){clearInterval(ivTmr);ivRun=false;ivCur=0;ivRem=0;ivPhase="study";$("iv-disp").textContent="00:00";$("iv-bdg").textContent="学習時間";$("iv-bdg").className="ivbdg ivs";$("iv-info").textContent="設定してスタート";$("iv-gbtn").textContent="インターバル開始";$("iv-inps").style.display="grid";$("iv-rbtn").style.display="none";}
+function ivUpd(){var m=Math.floor(ivRem/60),s=ivRem%60;$("iv-disp").textContent=p2(m)+":"+p2(s);}
+function ivUpdStatus(){if(ivPhase==="study"){$("iv-bdg").textContent="📖 学習時間";$("iv-bdg").className="ivbdg ivs";}else{$("iv-bdg").textContent="☕ 休憩時間";$("iv-bdg").className="ivbdg ivb";}$("iv-info").textContent="セット "+ivCur+" / "+ivTotal;}
+
+function recStudy(){
+  var mins=parseInt($("rec-min").value)||0;
+  if(!mins){alert("学習時間を入力してください。");return;}
+  var s=D.skills[curSkIdx];
+  var ses={
+    date:today(), minutes:mins,
+    pageFrom:$("rec-pf").value||"",
+    pageTo:$("rec-pt").value||"",
+    book:$("rec-book").value||"",
+    memo:$("rec-memo").value.trim()
+  };
+  s.sessions.push(ses); s.totalMin=(s.totalMin||0)+mins;
+  // 日誌にも自動記録
+  var txt="【"+s.name+"】"+mins+"分 学習";
+  if(ses.pageFrom&&ses.pageTo) txt+=" （p."+ses.pageFrom+"〜"+ses.pageTo+"）";
+  if(ses.book) txt+=" ／ "+ses.book;
+  if(ses.memo) txt+="\n"+ses.memo;
+  D.diaries.push({date:ses.date,text:txt,skill:s.name,studyMins:mins});
+  saveD(); closeStudy(); renderSkills(); renderHome();
+  var h=Math.floor(s.totalMin/60), m2=s.totalMin%60;
+  alert(mins+"分の学習を記録しました！\n累計学習時間："+h+"時間"+m2+"分");
 }
 
-// ━━━━ INIT ━━━━
-rHome();
-setSkillType(true);
+// ===== 貯金 =====
+function recSavings(){
+  var v=Number($("sv-inp").value);if(isNaN(v))return;
+  D.savings.push({date:today(),amount:v});$("sv-inp").value="";saveD();renderSavings();renderHome();
+}
+function renderSavings(){
+  var cur=D.savings.length?D.savings[D.savings.length-1].amount:0;
+  var tgt=Number(D.cfg.savTgt)||0;var pct=tgt>0?Math.min(100,Math.round(cur/tgt*100)):0;
+  $("sv-amt").textContent="¥"+cur.toLocaleString();
+  $("sv-tgt").textContent=tgt?"¥"+tgt.toLocaleString():"未設定";
+  $("sv-hint").textContent=tgt?"目標まで ¥"+Math.max(0,tgt-cur).toLocaleString():"設定から目標を入力してください";
+  $("sv-circ").style.strokeDashoffset=201-(201*pct/100);
+  $("sv-pct").textContent=pct+"%";
+  var cv=$("schart"),ce=$("schart-empty");
+  if(!D.savings.length){cv.style.display="none";ce.style.display="flex";}
+  else{cv.style.display="block";ce.style.display="none";drawChart(cv,D.savings);}
+  var h="";
+  if(!D.savings.length){$("sv-hist").innerHTML="<div style='color:var(--mu);font-size:14px'>記録がありません</div>";return;}
+  var arr=D.savings.slice().reverse();
+  for(var i=0;i<arr.length;i++){
+    var s=arr[i];var prev=arr[i+1]?arr[i+1].amount:null;var ch=prev!==null?s.amount-prev:null;
+    var chH=ch!==null?"<span class='"+(ch>=0?"up":"dn2")+"'>"+(ch>=0?"+":"")+"¥"+ch.toLocaleString()+"</span>":"";
+    h+="<div class='hi2'><div><div class='hid'>"+fmtD(s.date)+"</div>"+chH+"</div><div class='hia'>¥"+s.amount.toLocaleString()+"</div></div>";
+  }
+  $("sv-hist").innerHTML=h;
+}
+function drawChart(cv,data){
+  var ctx=cv.getContext("2d");var dpr=window.devicePixelRatio||1;var w=cv.offsetWidth,h=120;
+  cv.width=w*dpr;cv.height=h*dpr;cv.style.width=w+"px";cv.style.height=h+"px";ctx.scale(dpr,dpr);
+  var pts=data.slice(-8);var max=0;for(var i=0;i<pts.length;i++)if(pts[i].amount>max)max=pts[i].amount;if(!max)max=1;
+  var pd={t:10,r:10,b:30,l:50};var cw=w-pd.l-pd.r;var ch=h-pd.t-pd.b;
+  ctx.clearRect(0,0,w,h);ctx.strokeStyle="#e5e2dc";ctx.lineWidth=1;
+  var rs=[0,.5,1];
+  for(var i=0;i<rs.length;i++){var r=rs[i];var y=pd.t+ch*(1-r);ctx.beginPath();ctx.moveTo(pd.l,y);ctx.lineTo(pd.l+cw,y);ctx.stroke();ctx.fillStyle="#b5b5a8";ctx.font="9px Noto Sans JP";ctx.textAlign="right";ctx.fillText("¥"+Math.round(max*r/10000)+"万",pd.l-4,y+3);}
+  if(pts.length<2)return;
+  var xs=[],ys=[];for(var i=0;i<pts.length;i++){xs.push(pd.l+(i/(pts.length-1))*cw);ys.push(pd.t+ch*(1-pts[i].amount/max));}
+  var grd=ctx.createLinearGradient(0,pd.t,0,pd.t+ch);grd.addColorStop(0,"rgba(61,90,64,.18)");grd.addColorStop(1,"rgba(61,90,64,0)");
+  ctx.beginPath();ctx.moveTo(xs[0],ys[0]);for(var i=1;i<xs.length;i++)ctx.lineTo(xs[i],ys[i]);
+  ctx.lineTo(xs[xs.length-1],pd.t+ch);ctx.lineTo(xs[0],pd.t+ch);ctx.closePath();ctx.fillStyle=grd;ctx.fill();
+  ctx.beginPath();ctx.moveTo(xs[0],ys[0]);for(var i=1;i<xs.length;i++)ctx.lineTo(xs[i],ys[i]);
+  ctx.strokeStyle="#3d5a40";ctx.lineWidth=2;ctx.stroke();
+  for(var i=0;i<xs.length;i++){ctx.beginPath();ctx.arc(xs[i],ys[i],3,0,Math.PI*2);ctx.fillStyle="#3d5a40";ctx.fill();}
+  ctx.fillStyle="#b5b5a8";ctx.font="9px Noto Sans JP";ctx.textAlign="center";
+  for(var i=0;i<pts.length;i++){var d=new Date(pts[i].date);ctx.fillText((d.getMonth()+1)+"/"+(d.getDate()),xs[i],h-6);}
+}
+
+// ===== 日誌 =====
+function renderDiary(){
+  var now=new Date();$("d-month").textContent=now.getFullYear()+"年"+(now.getMonth()+1)+"月";
+  var wk=["日","月","火","水","木","金","土"];var h="";
+  for(var i=0;i<wk.length;i++)h+="<div class='cdh'>"+wk[i]+"</div>";$("d-calh").innerHTML=h;
+  var y=now.getFullYear(),m=now.getMonth(),fd=new Date(y,m,1).getDay(),dim=new Date(y,m+1,0).getDate(),tod=now.getDate();
+  var eD={};for(var i=0;i<D.diaries.length;i++){var dd=new Date(D.diaries[i].date);if(dd.getFullYear()===y&&dd.getMonth()===m)eD[dd.getDate()]=1;}
+  h="";for(var i=0;i<fd;i++)h+="<div></div>";
+  for(var d=1;d<=dim;d++)h+="<div class='cday"+(d===tod?" tod":"")+(eD[d]?" dot":"")+"'>"+d+"</div>";
+  $("d-cal").innerHTML=h;
+  var el=$("diarylist");
+  if(!D.diaries.length){el.innerHTML="<div class='card'><div class='empty'><span>まだ日誌がありません</span></div></div>";return;}
+  h="";var arr=D.diaries.slice().reverse();
+  for(var i=0;i<arr.length;i++){
+    var d=arr[i];var ri=D.diaries.length-1-i;
+    h+="<div class='dfi2'><div class='dfdt'>"+fmtD(d.date)+"</div><div class='dftt'>"+esc(d.text)+"</div>"
+      +"<div>"+(d.skill?"<span class='dtag'>&#128218; "+esc(d.skill)+"</span>":"")
+      +(d.studyMins?"<span class='mtag'>&#9201; "+d.studyMins+"分</span>":"")+"</div>"
+      +"<div style='display:flex;justify-content:flex-end;margin-top:10px'>"
+      +"<span style='color:var(--li);font-size:12px;cursor:pointer' onclick='delDiary("+ri+")'>削除</span></div></div>";
+  }
+  el.innerHTML=h;
+}
+function addDiary(){
+  var txt=$("dr-txt").value.trim();var dt=$("dr-date").value;if(!txt||!dt)return;
+  D.diaries.push({date:dt,text:txt,skill:$("dr-sk").value});$("dr-txt").value="";saveD();closeMod("m-diary");renderDiary();renderHome();
+}
+function delDiary(i){D.diaries.splice(i,1);saveD();renderDiary();}
+
+// ===== エリア =====
+function pickAcat(idx){arCatIdx=idx;var cc=document.querySelectorAll("#ar-cats .chip");for(var i=0;i<cc.length;i++)cc[i].className="chip"+(i===idx?" on":"");}
+function pickStar(n){arStar=n;updStars();}
+function updStars(){var ss=document.querySelectorAll("#ar-stars .star");for(var i=0;i<ss.length;i++)ss[i].className="star"+(i<arStar?" on":"");}
+function addArea(){
+  var nm=$("ar-name").value.trim();if(!nm)return;
+  D.areas.push({name:nm,cat:ACATS[arCatIdx],date:$("ar-date").value,content:$("ar-cont").value.trim(),stars:arStar});
+  $("ar-name").value="";$("ar-cont").value="";saveD();closeMod("m-area");renderArea();
+}
+function renderArea(){
+  var el=$("arealist");
+  if(!D.areas.length){el.innerHTML="<div class='card'><div class='empty'><span>エリアノートがありません</span><span style='font-size:13px'>訪問地や候補地の情報を記録しましょう</span></div></div>";return;}
+  var h="";
+  for(var i=0;i<D.areas.length;i++){
+    var a=D.areas[i];var st="";for(var j=0;j<5;j++)st+=(j<a.stars?"★":"☆");
+    h+="<div class='aitem'><div class='aih'><div><div class='ain2'>"+esc(a.name)+"</div><div class='aic3'>"+esc(a.cat)+"</div></div>"
+      +"<div style='display:flex;flex-direction:column;align-items:flex-end;gap:4px'><div class='aid'>"+(a.date?fmtD(a.date):"")+"</div>"
+      +"<div style='color:var(--li);cursor:pointer;font-size:16px' onclick='delArea("+i+")'>&#215;</div></div></div>"
+      +(a.stars>0?"<div class='ast2'>"+st+"</div>":"")
+      +(a.content?"<div class='apv'>"+esc(a.content.slice(0,100))+(a.content.length>100?"…":"")+"</div>":"")
+      +"</div>";
+  }
+  el.innerHTML=h;
+}
+function delArea(i){if(confirm("このエリアノートを削除しますか？")){D.areas.splice(i,1);saveD();renderArea();}}
+
+// ===== 初期化 =====
+loadD();
+renderHome();
+window.addEventListener("resize",function(){if(document.getElementById("s-savings").className.indexOf("on")>=0)renderSavings();});
 </script>
 </body>
 </html>
